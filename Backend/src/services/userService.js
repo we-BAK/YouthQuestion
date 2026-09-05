@@ -1,11 +1,11 @@
 // src/services/userService.js
-const supabase = require
+const supabase = require("../config/supabase");
 
 // Get all users
 async function getAllUsers() {
   const { data, error } = await supabase
-    .from('PROFILE') 
-    .select('*');
+    .from("user_profiles")
+    .select("*");
 
   if (error) throw new Error(error.message);
   return data;
@@ -14,19 +14,19 @@ async function getAllUsers() {
 // Get active users only
 async function getActiveUsers() {
   const { data, error } = await supabase
-    .from('PROFILE') 
-    .select('*')
-    .eq('is_active', true); // or status = 'ACTIVE' depending on your column
+    .from("user_profiles")
+    .select("*")
+    .eq("status", "Active");
 
   if (error) throw new Error(error.message);
   return data;
 }
 
-// Create new user (via Supabase Auth + PROFILE table)
+// Create new user (via Supabase Auth + user_profiles table)
 async function createNewUser(userData) {
-  const { email, password, role } = userData;
+  const { email, password, role, fullName, status } = userData;
 
-  // 1. Create auth user using Supabase Service Role Key
+  // 1. Create auth user in Supabase
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
     password,
@@ -35,15 +35,16 @@ async function createNewUser(userData) {
 
   if (authError) throw new Error(authError.message);
 
-  // 2. Insert into your custom user/profile table
+  // 2. Insert into custom user_profiles table matching your DB columns
   const { data, error } = await supabase
-    .from('PROFILE')
+    .from("user_profiles")
     .insert([
       {
         id: authData.user.id,
         email,
-        role_id: role,
-        is_active: true,
+        full_name: fullName,
+        role: role || "Reviewer",
+        status: status || "Active",
       },
     ])
     .select();
