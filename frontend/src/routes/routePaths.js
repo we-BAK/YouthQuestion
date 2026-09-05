@@ -1,5 +1,8 @@
+// frontend/src/routes/routePaths.js
 export const ROUTES = {
   LOGIN: "/login",
   ADMIN: "/admin",
-  ADMIN_USERS: "/admin/users",
+  USERS: "/admin/users",
+  QUESTIONS: "/admin/questions",
+  SETTINGS: "/admin/settings",
 };

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/routePaths";
 
@@ -10,24 +10,38 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate(ROUTES.USERS, { replace: true });
+      }
+    });
+  }, [navigate]);
+
   async function handleLogin(event) {
     event.preventDefault();
     setError("");
     setLoading(true);
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    setLoading(false);
+      if (loginError) {
+        setError(loginError.message);
+        return;
+      }
 
-    if (loginError) {
-      setError(loginError.message);
-      return;
+      if (data?.session) {
+        navigate(ROUTES.USERS, { replace: true });
+      }
+    } catch (err) {
+      setError("An unexpected error occurred during sign in.");
+    } finally {
+      setLoading(false);
     }
-
-    navigate(ROUTES.ADMIN_USERS, { replace: true });
   }
 
   return (
@@ -50,28 +64,32 @@ export default function LoginPage() {
         )}
 
         <label className="block">
-          <span className="label">Email</span>
+          <span className="text-sm font-medium text-slate-700">Email</span>
           <input
             required
             type="email"
-            className="input"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </label>
 
         <label className="block">
-          <span className="label">Password</span>
+          <span className="text-sm font-medium text-slate-700">Password</span>
           <input
             required
             type="password"
-            className="input"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </label>
 
-        <button disabled={loading} className="button-primary w-full">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50 transition-colors"
+        >
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
