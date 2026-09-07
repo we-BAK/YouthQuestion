@@ -64,6 +64,11 @@ export default function QuestionsPage() {
       }
 
       const selectedCat = categories.find((c) => c.id === categoryId);
+      const currentUserName =
+        session?.user?.user_metadata?.full_name ||
+        session?.user?.email ||
+        "You";
+
       setQuestions((prev) =>
         prev.map((q) => {
           if (q.id === questionId) {
@@ -71,7 +76,10 @@ export default function QuestionsPage() {
             if (exists) return q;
             return {
               ...q,
-              categories: [...(q.categories || []), selectedCat],
+              categories: [
+                ...(q.categories || []),
+                { ...selectedCat, assignedBy: currentUserName },
+              ],
             };
           }
           return q;
@@ -177,11 +185,17 @@ export default function QuestionsPage() {
                             key={cat.id}
                             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200"
                           >
-                            {cat.name}
+                            <span>{cat.name}</span>
+                            {cat.assignedBy && (
+                              <span className="text-[10px] text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded font-normal">
+                                by {cat.assignedBy}
+                              </span>
+                            )}
                             <button
                               type="button"
                               onClick={() => handleRemoveCategory(q.id, cat.id)}
                               className="text-orange-500 hover:text-orange-900 font-bold ml-0.5"
+                              title="Remove category"
                             >
                               ×
                             </button>
