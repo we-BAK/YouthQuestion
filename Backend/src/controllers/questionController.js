@@ -32,8 +32,12 @@ async function addCategory(req, res) {
     const { id } = req.params;
     const { categoryId } = req.body;
 
-    // Pass auth.users ID (req.user.id) or user_profiles table ID (req.profile.id)
-    const adminUserId = req.user?.id || req.profile?.id;
+    // Use profile ID from middleware
+    const adminUserId = req.profile?.id || req.user?.id;
+
+    if (!categoryId) {
+      return res.status(400).json({ error: "categoryId is required" });
+    }
 
     const result = await assignCategoryToQuestion(id, categoryId, adminUserId);
     res.status(200).json(result);
