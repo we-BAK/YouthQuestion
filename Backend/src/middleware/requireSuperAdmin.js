@@ -2,7 +2,15 @@ const supabase = require("../config/supabase");
 
 async function requireSuperAdmin(req, res, next) {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || authHeader === "Bearer" || authHeader.includes("undefined") || authHeader.includes("null")) {
+      return res.status(401).json({
+        error: "Authentication required",
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "").trim();
 
     if (!token) {
       return res.status(401).json({
@@ -20,7 +28,7 @@ async function requireSuperAdmin(req, res, next) {
       });
     }
 
-    // 2. Fetch profile from user_profiles table using the actual database columns
+    // 2. Fetch profile from user_profiles table
     const { data: profile, error: profileError } = await supabase
       .from("user_profiles")
       .select("id, role, status")
@@ -47,6 +55,8 @@ async function requireSuperAdmin(req, res, next) {
       });
     }
 
+    // Attach user objects so both req.user and req.admin are accessible
+    req.user = authData.user;
     req.admin = authData.user;
     req.profile = profile;
 

@@ -1,16 +1,62 @@
-// src/services/questionService.js
-const supabase = require("../config/supabase");
+// src/controllers/questionController.js
+const {
+  getAllQuestions,
+  saveTelegramQuestion,
+  assignCategoryToQuestion,
+  removeCategoryFromQuestion,
+} = require("../services/questionService");
 
-async function getAllQuestions() {
-  const { data, error } = await supabase
-    .from("QUESTIONS") // Adjust table name to match your DB schema
-    .select("*")
-    .order("created_at", { ascending: false });
+async function getQuestions(req, res) {
+  try {
+    const questions = await getAllQuestions();
+    res.json(questions);
+  } catch (error) {
+    console.error("❌ Failed to get questions:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
 
-  if (error) throw new Error(error.message);
-  return data;
+async function createQuestion(req, res) {
+  try {
+    const { message, question } = req.body;
+    const result = await saveTelegramQuestion(message, question);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error("❌ Failed to create question:", error);
+    res.status(400).json({ error: error.message });
+  }
+}
+
+async function addCategory(req, res) {
+  try {
+    const { id } = req.params;
+    const { categoryId } = req.body;
+
+    // Pass auth.users ID (req.user.id) or user_profiles table ID (req.profile.id)
+    const adminUserId = req.user?.id || req.profile?.id;
+
+    const result = await assignCategoryToQuestion(id, categoryId, adminUserId);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("❌ Failed to assign category:", error);
+    res.status(400).json({ error: error.message });
+  }
+}
+
+async function removeCategory(req, res) {
+  try {
+    const { id, categoryId } = req.params;
+    await removeCategoryFromQuestion(id, categoryId);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Failed to remove category:", error);
+    res.status(400).json({ error: error.message });
+  }
 }
 
 module.exports = {
-  getAllQuestions,
+  getQuestions,
+  createQuestion,
+  addCategory,
+  removeCategory,
 };
