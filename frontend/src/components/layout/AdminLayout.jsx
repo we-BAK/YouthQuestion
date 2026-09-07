@@ -46,6 +46,19 @@ export default function AdminLayout() {
             </NavLink>
 
             <NavLink
+              to={ROUTES.AUDIT_LOGS}
+              className={({ isActive }) =>
+                `block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-orange-50 text-orange-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+              }
+            >
+              Audit Logs
+            </NavLink>
+
+            <NavLink
               to={ROUTES.SETTINGS}
               className={({ isActive }) =>
                 `block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${

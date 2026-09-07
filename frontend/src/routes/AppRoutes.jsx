@@ -3,7 +3,8 @@ import AdminLayout from "../components/layout/AdminLayout";
 import LoginPage from "../pages/Login/LoginPage";
 import UserManagementPage from "../pages/Admin/UserManagementPage";
 import QuestionsPage from "../pages/Admin/QuestionsPage";
-import SettingsPage from "../pages/Admin/SettingsPage"; // 1. Import SettingsPage
+import SettingsPage from "../pages/Admin/SettingsPage";
+import AuditLogsPage from "../pages/Admin/AuditLogs";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROUTES } from "./routePaths";
 
@@ -18,7 +19,8 @@ export default function AppRoutes() {
           <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="questions" element={<QuestionsPage />} />
-          <Route path="settings" element={<SettingsPage />} /> {/* 2. Add route */}
+          <Route path="audit-logs" element={<AuditLogsPage />} /> {/* 2. Add audit-logs route */}
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
 
