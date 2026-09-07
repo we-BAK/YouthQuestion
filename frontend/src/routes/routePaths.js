@@ -4,5 +4,6 @@ export const ROUTES = {
   ADMIN: "/admin",
   USERS: "/admin/users",
   QUESTIONS: "/admin/questions",
+  AUDIT_LOGS: "/admin/audit-logs",
   SETTINGS: "/admin/settings",
 };
