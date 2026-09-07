@@ -1,19 +1,56 @@
 // src/services/auditService.js
 const supabase = require("../config/supabase");
 
-async function logUserAction({ profileId, action, entityType = null, entityId = null, oldValues = null, newValues = null }) {
-  const { error } = await supabase.from("audit_logs").insert({
-    profile_id: profileId,
-    action: action,               // e.g., 'EXPORT_REPORT', 'LOGIN', 'ASSIGN_CATEGORY'
-    entity_type: entityType,       // e.g., 'question', 'user'
-    entity_id: entityId,
-    old_values: oldValues,
-    new_values: newValues,
-  });
+async function getAuditLogs(limit = 100) {
+  const { data: logs, error } = await supabase
+    .from("audit_logs")
+    .select(`
+      id,
+      action,
+      entity_type,
+      entity_id,
+      old_values,
+      new_values,
+      created_at,
+      profile_id
+    `)
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
-    console.error("❌ Failed to create audit log entry:", error.message);
+    throw new Error(`Failed to fetch audit logs: ${error.message}`);
   }
+
+  // Extract unique profile IDs to get user details
+  const profileIds = [
+    ...new Set(logs.map((log) => log.profile_id).filter(Boolean)),
+  ];
+
+  const profileMap = {};
+  if (profileIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("user_profiles")
+      .select("id, full_name, email")
+      .in("id", profileIds);
+
+    if (profiles) {
+      profiles.forEach((p) => {
+        profileMap[p.id] = p.full_name || p.email;
+      });
+    }
+  }
+
+  // Format and enrich log records
+  return logs.map((log) => ({
+    id: log.id,
+    action: log.action,
+    entityType: log.entity_type,
+    entityId: log.entity_id,
+    oldValues: log.old_values,
+    newValues: log.new_values,
+    createdAt: log.created_at,
+    performedBy: profileMap[log.profile_id] || "System / Anonymous",
+  }));
 }
 
-module.exports = { logUserAction };
+module.exports = { getAuditLogs };

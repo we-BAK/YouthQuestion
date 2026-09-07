@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const userRoutes = require("./routes/userRoutes");
 const questionRoutes = require("./routes/questionRoutes");
+const auditRoutes = require("./routes/auditRoutes");
 
 const app = express();
 
@@ -22,6 +23,11 @@ app.use(
 app.use(
   "/api/questions",
   questionRoutes
+);
+
+app.use(
+  "/api/audit-logs",
+  auditRoutes
 );
 
 app.get("/api/health", (_req, res) => {
