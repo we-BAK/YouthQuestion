@@ -5,6 +5,7 @@ import { ROUTES } from "../../routes/routePaths";
 import EthiopianCross from "../ui/EthiopianCross";
 import TibebRibbon from "../ui/TibebRibbon";
 import {
+  LayoutDashboard,
   Calendar,
   MessageSquare,
   Users,
@@ -37,6 +38,7 @@ export default function AdminLayout() {
   // Get current page title based on route
   const getPageTitle = () => {
     const path = location.pathname;
+    if (path.includes("/admin/dashboard")) return "Spiritual Ministry Dashboard";
     if (path.includes("/admin/programs/new")) return "Create New Program";
     if (path.match(/\/admin\/programs\/\d+/)) return "Program Details & Questions";
     if (path.includes("/admin/programs")) return "Spiritual Programs & Gatherings";
@@ -48,6 +50,12 @@ export default function AdminLayout() {
   };
 
   const navItems = [
+    {
+      to: ROUTES.DASHBOARD,
+      label: "Ministry Dashboard",
+      amharic: "ዳሽቦርድ (አጠቃላይ እይታ)",
+      icon: LayoutDashboard,
+    },
     {
       to: ROUTES.PROGRAMS,
       label: "Programs Management",

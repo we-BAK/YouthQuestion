@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AdminLayout from "../components/layout/AdminLayout";
 import LoginPage from "../pages/Login/LoginPage";
+import DashboardPage from "../pages/Admin/DashboardPage";
 import UserManagementPage from "../pages/Admin/UserManagementPage";
 import QuestionsPage from "../pages/Admin/QuestionsPage";
 import SettingsPage from "../pages/Admin/SettingsPage";
@@ -19,7 +20,8 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path={ROUTES.ADMIN} element={<AdminLayout />}>
-          <Route index element={<Navigate to="programs" replace />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="questions" element={<QuestionsPage />} />
           

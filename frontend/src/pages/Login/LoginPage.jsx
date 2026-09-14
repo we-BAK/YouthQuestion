@@ -16,7 +16,7 @@ export default function LoginPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate(ROUTES.PROGRAMS, { replace: true });
+        navigate(ROUTES.DASHBOARD, { replace: true });
       }
     });
   }, [navigate]);
@@ -38,7 +38,7 @@ export default function LoginPage() {
       }
 
       if (data?.session) {
-        navigate(ROUTES.PROGRAMS, { replace: true });
+        navigate(ROUTES.DASHBOARD, { replace: true });
       }
     } catch (err) {
       setError("An unexpected error occurred during sign in.");
