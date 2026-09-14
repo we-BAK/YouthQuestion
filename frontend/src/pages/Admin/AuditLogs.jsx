@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import EthiopianCross from "../../components/ui/EthiopianCross";
+import { RotateCw, ShieldAlert, FileText } from "lucide-react";
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState([]);
@@ -31,7 +33,7 @@ export default function AuditLogsPage() {
         throw new Error(data.error || `HTTP ${response.status}: Failed to fetch logs`);
       }
 
-      setLogs(data);
+      setLogs(data || []);
     } catch (err) {
       console.error("❌ Audit logs error:", err);
       setError(err.message);
@@ -43,103 +45,115 @@ export default function AuditLogsPage() {
   const getBadgeStyle = (action) => {
     switch (action) {
       case "INSERT":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "CREATE_PROGRAM":
+        return "bg-emerald-50 text-emerald-800 border-emerald-300";
       case "UPDATE":
-        return "bg-blue-50 text-blue-700 border-blue-200";
+        return "bg-blue-50 text-blue-800 border-blue-300";
       case "DELETE":
-        return "bg-rose-50 text-rose-700 border-rose-200";
+        return "bg-rose-50 text-rose-800 border-rose-300";
       default:
-        return "bg-slate-100 text-slate-700 border-slate-200";
+        return "bg-amber-50 text-amber-800 border-amber-300";
     }
   };
 
-  if (loading) {
-    return <div className="p-4 text-slate-500">Loading audit history...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg">
-        <strong>Error:</strong> {error}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-800">System Audit Logs</h2>
-          <p className="text-sm text-slate-500">
-            Track database insertions, updates, and deletions executed by administrators.
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-full border border-amber-300/50">
+              የስርዓት ክትትል • Audit Trail
+            </span>
+          </div>
+          <h2 className="font-serif-eotc text-3xl font-bold text-slate-900 tracking-tight">
+            System Activity & Audit Logs
+          </h2>
+          <p className="text-sm text-slate-600 mt-1">
+            Track authorized operations, question classifications, and program modifications.
           </p>
         </div>
+
         <button
           onClick={fetchLogs}
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
         >
-          Refresh Logs
+          <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-600" : ""}`} />
+          <span>Refresh History</span>
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full text-left border-collapse text-sm">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium text-xs uppercase tracking-wider">
-            <tr>
-              <th className="py-3 px-4">Timestamp</th>
-              <th className="py-3 px-4">User</th>
-              <th className="py-3 px-4">Action</th>
-              <th className="py-3 px-4">Entity</th>
-              <th className="py-3 px-4">Payload Changes</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {logs.length === 0 ? (
+      {error && (
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm">
+          <strong>Error:</strong> {error}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm">
+        {loading ? (
+          <div className="p-16 text-center flex flex-col items-center space-y-3">
+            <EthiopianCross size={36} variant="gold" className="animate-spin" />
+            <p className="text-sm font-medium text-slate-500">Loading audit trail...</p>
+          </div>
+        ) : (
+          <table className="w-full text-left border-collapse text-xs">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
               <tr>
-                <td colSpan="5" className="py-8 text-center text-slate-400">
-                  No activity logs recorded yet.
-                </td>
+                <th className="py-3.5 px-5">Timestamp</th>
+                <th className="py-3.5 px-5">Administrator / Performer</th>
+                <th className="py-3.5 px-5">Operation</th>
+                <th className="py-3.5 px-5">Target Entity</th>
+                <th className="py-3.5 px-5">Payload Changes</th>
               </tr>
-            ) : (
-              logs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-4 whitespace-nowrap text-xs text-slate-500">
-                    {new Date(log.createdAt).toLocaleString()}
-                  </td>
-                  <td className="py-3 px-4 font-medium text-slate-900">
-                    {log.performedBy}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`inline-block px-2 py-0.5 text-xs font-semibold rounded border ${getBadgeStyle(
-                        log.action
-                      )}`}
-                    >
-                      {log.action}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 font-mono text-xs text-slate-600">
-                    {log.entityType || "N/A"}
-                  </td>
-                  <td className="py-3 px-4 font-mono text-xs text-slate-600">
-                    {log.newValues && (
-                      <div className="max-w-md truncate">
-                        <span className="text-slate-400 font-medium">New:</span>{" "}
-                        {JSON.stringify(log.newValues)}
-                      </div>
-                    )}
-                    {log.oldValues && (
-                      <div className="max-w-md truncate text-slate-400">
-                        <span className="font-medium">Old:</span>{" "}
-                        {JSON.stringify(log.oldValues)}
-                      </div>
-                    )}
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {logs.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="py-12 text-center text-slate-400">
+                    No activity logs recorded yet.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                logs.map((log) => (
+                  <tr key={log.id} className="hover:bg-amber-50/20 transition-colors">
+                    <td className="py-3.5 px-5 whitespace-nowrap text-slate-500 font-mono">
+                      {new Date(log.createdAt).toLocaleString()}
+                    </td>
+                    <td className="py-3.5 px-5 font-semibold text-slate-900">
+                      {log.performedBy || "System Admin"}
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 font-bold rounded-full border ${getBadgeStyle(
+                          log.action
+                        )}`}
+                      >
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5 font-mono text-slate-700">
+                      {log.entityType || "N/A"}
+                    </td>
+                    <td className="py-3.5 px-5 font-mono text-[11px] text-slate-600">
+                      {log.newValues && (
+                        <div className="max-w-md truncate">
+                          <span className="text-amber-700 font-semibold">New:</span>{" "}
+                          {JSON.stringify(log.newValues)}
+                        </div>
+                      )}
+                      {log.oldValues && (
+                        <div className="max-w-md truncate text-slate-400">
+                          <span className="font-semibold">Old:</span>{" "}
+                          {JSON.stringify(log.oldValues)}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

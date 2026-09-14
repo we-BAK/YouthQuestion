@@ -5,6 +5,9 @@ import UserManagementPage from "../pages/Admin/UserManagementPage";
 import QuestionsPage from "../pages/Admin/QuestionsPage";
 import SettingsPage from "../pages/Admin/SettingsPage";
 import AuditLogsPage from "../pages/Admin/AuditLogs";
+import ProgramsListPage from "../pages/Admin/ProgramsListPage";
+import CreateProgramPage from "../pages/Admin/CreateProgramPage";
+import ProgramDetailsPage from "../pages/Admin/ProgramDetailsPage";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROUTES } from "./routePaths";
 
@@ -16,10 +19,16 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path={ROUTES.ADMIN} element={<AdminLayout />}>
-          <Route index element={<Navigate to="users" replace />} />
+          <Route index element={<Navigate to="programs" replace />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="questions" element={<QuestionsPage />} />
-          <Route path="audit-logs" element={<AuditLogsPage />} /> {/* 2. Add audit-logs route */}
+          
+          {/* Programs Routes */}
+          <Route path="programs" element={<ProgramsListPage />} />
+          <Route path="programs/new" element={<CreateProgramPage />} />
+          <Route path="programs/:id" element={<ProgramDetailsPage />} />
+
+          <Route path="audit-logs" element={<AuditLogsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
