@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Bell,
+  Tag,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -43,9 +44,10 @@ export default function AdminLayout() {
     if (path.match(/\/admin\/programs\/\d+/)) return "Program Details & Questions";
     if (path.includes("/admin/programs")) return "Spiritual Programs & Gatherings";
     if (path.includes("/admin/questions")) return "Youth Inquiries & Questions Review";
+    if (path.includes("/admin/categories")) return "Question Categories & Taxonomies";
     if (path.includes("/admin/users")) return "User & Clergy Management";
     if (path.includes("/admin/audit-logs")) return "System Audit History";
-    if (path.includes("/admin/settings")) return "Platform & Category Settings";
+    if (path.includes("/admin/settings")) return "Platform Settings & Security";
     return "Administration Portal";
   };
 
@@ -69,6 +71,12 @@ export default function AdminLayout() {
       icon: MessageSquare,
     },
     {
+      to: ROUTES.CATEGORIES,
+      label: "Question Categories",
+      amharic: "የጥያቄ ምድቦች (ማደራጃ)",
+      icon: Tag,
+    },
+    {
       to: ROUTES.USERS,
       label: "User Management",
       amharic: "የአባላት አስተዳደር",
@@ -82,8 +90,8 @@ export default function AdminLayout() {
     },
     {
       to: ROUTES.SETTINGS,
-      label: "Settings & Categories",
-      amharic: "ቅንብሮች",
+      label: "Settings & Security",
+      amharic: "ቅንብሮችና ደህንነት",
       icon: Settings,
     },
   ];

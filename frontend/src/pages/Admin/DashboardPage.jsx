@@ -503,10 +503,10 @@ export default function DashboardPage() {
             </div>
 
             <Link
-              to={ROUTES.SETTINGS}
+              to={ROUTES.CATEGORIES}
               className="mt-3 block text-center text-xs font-bold text-amber-700 hover:text-amber-900 pt-2 border-t border-slate-100"
             >
-              + Configure Spiritual Categories
+              + Manage & Create Categories • ምድቦች
             </Link>
           </div>
 
@@ -526,6 +526,14 @@ export default function DashboardPage() {
               >
                 <Plus className="w-4 h-4 text-amber-600" />
                 <span>Schedule New Youth Program</span>
+              </Link>
+
+              <Link
+                to={ROUTES.CATEGORIES}
+                className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200/80 hover:border-amber-400 text-xs font-bold text-slate-800 hover:text-amber-800 shadow-2xs transition"
+              >
+                <Tag className="w-4 h-4 text-amber-600" />
+                <span>Manage & Create Categories</span>
               </Link>
 
               <Link

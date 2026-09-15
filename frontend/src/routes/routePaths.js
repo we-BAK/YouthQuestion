@@ -8,6 +8,7 @@ export const ROUTES = {
   PROGRAMS: "/admin/programs",
   PROGRAM_CREATE: "/admin/programs/new",
   PROGRAM_DETAILS: "/admin/programs/:id",
+  CATEGORIES: "/admin/categories",
   AUDIT_LOGS: "/admin/audit-logs",
   SETTINGS: "/admin/settings",
 };

@@ -5,6 +5,7 @@ import DashboardPage from "../pages/Admin/DashboardPage";
 import UserManagementPage from "../pages/Admin/UserManagementPage";
 import QuestionsPage from "../pages/Admin/QuestionsPage";
 import SettingsPage from "../pages/Admin/SettingsPage";
+import CategoriesPage from "../pages/Admin/CategoriesPage";
 import AuditLogsPage from "../pages/Admin/AuditLogs";
 import ProgramsListPage from "../pages/Admin/ProgramsListPage";
 import CreateProgramPage from "../pages/Admin/CreateProgramPage";
@@ -30,6 +31,7 @@ export default function AppRoutes() {
           <Route path="programs/new" element={<CreateProgramPage />} />
           <Route path="programs/:id" element={<ProgramDetailsPage />} />
 
+          <Route path="categories" element={<CategoriesPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
