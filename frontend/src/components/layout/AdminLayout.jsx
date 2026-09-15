@@ -82,6 +82,13 @@ export default function AdminLayout() {
       amharic: "የአባላት አስተዳደር",
       icon: Users,
     },
+
+{
+  to: ROUTES.ROLES_PERMISSIONS,
+  label: "Roles & Permissions",
+  amharic: "የሚናና ፈቃዶች አስተዳደር",
+  icon: ShieldCheck,
+},
     {
       to: ROUTES.AUDIT_LOGS,
       label: "Audit Logs",

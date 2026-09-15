@@ -12,13 +12,12 @@ import CreateProgramPage from "../pages/Admin/CreateProgramPage";
 import ProgramDetailsPage from "../pages/Admin/ProgramDetailsPage";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROUTES } from "./routePaths";
-
+import RolesPermissionsPage from "../pages/Admin/roles-permissions";
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-
       <Route element={<ProtectedRoute />}>
         <Route path={ROUTES.ADMIN} element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
@@ -33,6 +32,7 @@ export default function AppRoutes() {
 
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
+          <Route path="roles-permissions" element={<RolesPermissionsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
