@@ -4,7 +4,21 @@ import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/routePaths";
 import { fetchQuestions } from "../../Services/questionService";
 import { getUsers } from "../../Services/userService";
+import { getCategories } from "../../Services/categoryService";
 import EthiopianCross from "../../components/ui/EthiopianCross";
+import Can from "../../components/auth/Can";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+async function getAuthHeaders() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session?.access_token || ""}`,
+  };
+}
 import {
   LayoutDashboard,
   HelpCircle,
@@ -43,13 +57,15 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
 
-      const [questionsData, programsRes, { data: categoriesData }, usersData] =
+      const headers = await getAuthHeaders();
+
+      const [questionsData, programsRes, categoriesData, usersData] =
         await Promise.all([
           fetchQuestions().catch(() => []),
-          fetch("/api/programs")
+          fetch(`${API_URL}/api/programs`, { headers })
             .then((r) => (r.ok ? r.json() : []))
             .catch(() => []),
-          supabase.from("categories").select("*").order("name"),
+          getCategories().catch(() => []),
           getUsers().catch(() => []),
         ]);
 
@@ -138,21 +154,25 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap gap-3 shrink-0">
-            <Link
-              to={ROUTES.PROGRAM_CREATE}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>+ New Program</span>
-            </Link>
+            <Can permission="PROGRAMS_CREATE">
+              <Link
+                to={ROUTES.PROGRAM_CREATE}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ New Program</span>
+              </Link>
+            </Can>
 
-            <Link
-              to={ROUTES.QUESTIONS}
-              className="inline-flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700/90 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-700 transition-colors"
-            >
-              <HelpCircle className="w-4 h-4 text-amber-400" />
-              <span>Review Questions</span>
-            </Link>
+            <Can permission="QUESTIONS_VIEW">
+              <Link
+                to={ROUTES.QUESTIONS}
+                className="inline-flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700/90 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-700 transition-colors"
+              >
+                <HelpCircle className="w-4 h-4 text-amber-400" />
+                <span>Review Questions</span>
+              </Link>
+            </Can>
           </div>
         </div>
       </div>

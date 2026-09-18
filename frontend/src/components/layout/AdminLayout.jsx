@@ -1,7 +1,6 @@
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/routePaths";
+import { useAuth } from "../../context/AuthContext";
 import EthiopianCross from "../ui/EthiopianCross";
 import TibebRibbon from "../ui/TibebRibbon";
 import {
@@ -21,18 +20,10 @@ import {
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setCurrentUser(user);
-      }
-    });
-  }, []);
+  const { user, profile, role, hasPermission, logout } = useAuth();
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    await logout();
     navigate(ROUTES.LOGIN, { replace: true });
   }
 
@@ -47,6 +38,7 @@ export default function AdminLayout() {
     if (path.includes("/admin/categories")) return "Question Categories & Taxonomies";
     if (path.includes("/admin/users")) return "User & Clergy Management";
     if (path.includes("/admin/audit-logs")) return "System Audit History";
+    if (path.includes("/admin/roles-permissions")) return "Roles & Permissions Management";
     if (path.includes("/admin/settings")) return "Platform Settings & Security";
     return "Administration Portal";
   };
@@ -57,51 +49,63 @@ export default function AdminLayout() {
       label: "Ministry Dashboard",
       amharic: "ዳሽቦርድ (አጠቃላይ እይታ)",
       icon: LayoutDashboard,
+      // Dashboard accessible to all authenticated staff
     },
     {
       to: ROUTES.PROGRAMS,
       label: "Programs Management",
       amharic: "የመርሐ-ግብር አስተዳደር",
       icon: Calendar,
+      permission: "PROGRAMS_VIEW",
     },
     {
       to: ROUTES.QUESTIONS,
       label: "Questions Review",
       amharic: "የጥያቄዎች ምርመራ",
       icon: MessageSquare,
+      permission: "QUESTIONS_VIEW",
     },
     {
       to: ROUTES.CATEGORIES,
       label: "Question Categories",
       amharic: "የጥያቄ ምድቦች (ማደራጃ)",
       icon: Tag,
+      permission: "CATEGORIES_VIEW",
     },
     {
       to: ROUTES.USERS,
       label: "User Management",
       amharic: "የአባላት አስተዳደር",
       icon: Users,
+      permission: "USERS_VIEW",
     },
-
-{
-  to: ROUTES.ROLES_PERMISSIONS,
-  label: "Roles & Permissions",
-  amharic: "የሚናና ፈቃዶች አስተዳደር",
-  icon: ShieldCheck,
-},
+    {
+      to: ROUTES.ROLES_PERMISSIONS,
+      label: "Roles & Permissions",
+      amharic: "የሚናና ፈቃዶች አስተዳደር",
+      icon: ShieldCheck,
+      permission: "ROLES_VIEW",
+    },
     {
       to: ROUTES.AUDIT_LOGS,
       label: "Audit Logs",
       amharic: "የስርዓት መዝገብ",
       icon: FileText,
+      permission: "AUDIT_LOGS_VIEW",
     },
     {
       to: ROUTES.SETTINGS,
       label: "Settings & Security",
       amharic: "ቅንብሮችና ደህንነት",
       icon: Settings,
+      permission: "SETTINGS_VIEW",
     },
   ];
+
+  // Dynamically filter items so revoked permissions immediately remove links
+  const visibleNavItems = navItems.filter(
+    (item) => !item.permission || hasPermission(item.permission)
+  );
 
   return (
     <div className="min-h-screen bg-[#f8f6f1] flex flex-col text-slate-800">
@@ -139,7 +143,7 @@ export default function AdminLayout() {
             <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
               Ministry Operations
             </p>
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
@@ -185,15 +189,15 @@ export default function AdminLayout() {
         <div className="p-4 border-t border-slate-800 bg-[#080d18]/60 space-y-3">
           <div className="flex items-center gap-3 px-2 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-600 to-rose-800 flex items-center justify-center text-white font-bold text-xs shadow-md border border-amber-400/30">
-              {currentUser?.email ? currentUser.email.charAt(0).toUpperCase() : "E"}
+              {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : "E"}
             </div>
             <div className="flex-1 min-w-0 text-left">
               <p className="text-xs font-semibold text-slate-200 truncate">
-                {currentUser?.user_metadata?.full_name || currentUser?.email || "Admin User"}
+                {profile?.full_name || user?.user_metadata?.full_name || user?.email || "Staff User"}
               </p>
               <div className="flex items-center gap-1 text-[10px] text-amber-400">
                 <ShieldCheck className="w-3 h-3" />
-                <span>Authorized Reviewer</span>
+                <span className="truncate">{role?.name || profile?.role || "Authorized User"}</span>
               </div>
             </div>
           </div>
@@ -201,7 +205,7 @@ export default function AdminLayout() {
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 hover:bg-rose-900/50 border border-rose-900/40 transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 hover:bg-rose-900/50 border border-rose-900/40 transition-all duration-200 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out • ውጣ</span>

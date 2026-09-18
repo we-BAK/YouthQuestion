@@ -3,6 +3,8 @@ import { supabase } from "../../lib/supabase";
 import EthiopianCross from "../../components/ui/EthiopianCross";
 import { RotateCw, ShieldAlert, FileText } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ export default function AuditLogsPage() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      const response = await fetch("/api/audit-logs", {
+      const response = await fetch(`${API_URL}/api/audit-logs`, {
         headers: {
           Authorization: `Bearer ${session?.access_token || ""}`,
           "Content-Type": "application/json",

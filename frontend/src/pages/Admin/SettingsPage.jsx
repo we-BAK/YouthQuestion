@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../context/AuthContext";
 import EthiopianCross from "../../components/ui/EthiopianCross";
 import {
   KeyRound,
@@ -17,7 +18,9 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const [currentUser, setCurrentUser] = useState(null);
+  // Get live RBAC profile and role from AuthContext
+  const { user, profile, role } = useAuth();
+  const currentUser = user;
 
   // Password state
   const [newPassword, setNewPassword] = useState("");
@@ -31,13 +34,7 @@ export default function SettingsPage() {
   const [notifyOnNewQuestions, setNotifyOnNewQuestions] = useState(true);
   const [liturgicalMottoEnabled, setLiturgicalMottoEnabled] = useState(true);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setCurrentUser(user);
-      }
-    });
-  }, []);
+
 
   async function handlePasswordChange(e) {
     e.preventDefault();
@@ -217,7 +214,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-1.5 pt-0.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span className="text-xs font-bold text-slate-900">
-                {currentUser?.user_metadata?.role || "Authorized Administrator"}
+                {role?.name || profile?.role || "Authorized Administrator"}
               </span>
             </div>
           </div>
@@ -227,7 +224,7 @@ export default function SettingsPage() {
               Full Name
             </span>
             <p className="text-xs font-bold text-slate-900">
-              {currentUser?.user_metadata?.full_name || "Clergy Administrator"}
+              {profile?.full_name || currentUser?.user_metadata?.full_name || "Clergy Administrator"}
             </p>
           </div>
 

@@ -10,30 +10,113 @@ import AuditLogsPage from "../pages/Admin/AuditLogs";
 import ProgramsListPage from "../pages/Admin/ProgramsListPage";
 import CreateProgramPage from "../pages/Admin/CreateProgramPage";
 import ProgramDetailsPage from "../pages/Admin/ProgramDetailsPage";
-import ProtectedRoute from "./ProtectedRoute";
-import { ROUTES } from "./routePaths";
 import RolesPermissionsPage from "../pages/Admin/roles-permissions";
+import AccessDenied from "../pages/Admin/AccessDenied";
+import ProtectedRoute from "./ProtectedRoute";
+import PermissionRoute from "./PermissionRoute";
+import { ROUTES } from "./routePaths";
+
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+
       <Route element={<ProtectedRoute />}>
         <Route path={ROUTES.ADMIN} element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="users" element={<UserManagementPage />} />
-          <Route path="questions" element={<QuestionsPage />} />
-          
-          {/* Programs Routes */}
-          <Route path="programs" element={<ProgramsListPage />} />
-          <Route path="programs/new" element={<CreateProgramPage />} />
-          <Route path="programs/:id" element={<ProgramDetailsPage />} />
 
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="audit-logs" element={<AuditLogsPage />} />
-          <Route path="roles-permissions" element={<RolesPermissionsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          {/* Dashboard is open to all authenticated ministry staff */}
+          <Route path="dashboard" element={<DashboardPage />} />
+
+          {/* User Management */}
+          <Route
+            path="users"
+            element={
+              <PermissionRoute permission="USERS_VIEW">
+                <UserManagementPage />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Questions Review */}
+          <Route
+            path="questions"
+            element={
+              <PermissionRoute permission="QUESTIONS_VIEW">
+                <QuestionsPage />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Programs Routes */}
+          <Route
+            path="programs"
+            element={
+              <PermissionRoute permission="PROGRAMS_VIEW">
+                <ProgramsListPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="programs/new"
+            element={
+              <PermissionRoute permission="PROGRAMS_CREATE">
+                <CreateProgramPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="programs/:id"
+            element={
+              <PermissionRoute permission="PROGRAMS_VIEW">
+                <ProgramDetailsPage />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Categories */}
+          <Route
+            path="categories"
+            element={
+              <PermissionRoute permission="CATEGORIES_VIEW">
+                <CategoriesPage />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Roles & Permissions */}
+          <Route
+            path="roles-permissions"
+            element={
+              <PermissionRoute permission="ROLES_VIEW">
+                <RolesPermissionsPage />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Audit Logs */}
+          <Route
+            path="audit-logs"
+            element={
+              <PermissionRoute permission="AUDIT_LOGS_VIEW">
+                <AuditLogsPage />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Settings */}
+          <Route
+            path="settings"
+            element={
+              <PermissionRoute permission="SETTINGS_VIEW">
+                <SettingsPage />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Explicit Access Denied Page */}
+          <Route path="access-denied" element={<AccessDenied />} />
         </Route>
       </Route>
 

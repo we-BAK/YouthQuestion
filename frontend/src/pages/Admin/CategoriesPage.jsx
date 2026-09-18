@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
 import { fetchQuestions } from "../../Services/questionService";
+import { getCategories } from "../../Services/categoryService";
 import EthiopianCross from "../../components/ui/EthiopianCross";
+import Can from "../../components/auth/Can";
 import {
   Tag,
   Plus,
@@ -33,12 +34,10 @@ export default function CategoriesPage() {
       setLoading(true);
       setError("");
 
-      const [{ data: catData, error: catErr }, questionsData] = await Promise.all([
-        supabase.from("categories").select("*").order("name", { ascending: true }),
+      const [catData, questionsData] = await Promise.all([
+        getCategories().catch(() => []),
         fetchQuestions().catch(() => []),
       ]);
-
-      if (catErr) throw catErr;
 
       setCategories(catData || []);
       setQuestions(questionsData || []);
@@ -185,72 +184,74 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      {/* Add Category Section */}
-      <div className="rounded-3xl border border-amber-900/15 bg-white p-6 shadow-sm space-y-4">
-        <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-          <div className="p-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
-            <Plus className="w-4 h-4" />
+      {/* Add Category Section - Only visible if user has CATEGORIES_CREATE permission */}
+      <Can permission="CATEGORIES_CREATE">
+        <div className="rounded-3xl border border-amber-900/15 bg-white p-6 shadow-sm space-y-4">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+              <Plus className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="font-serif-eotc text-base font-bold text-slate-900">
+                Create New Category (አዲስ ምድብ ማከል)
+              </h2>
+              <p className="text-xs text-slate-500">
+                Add a new spiritual category so reviewers can tag incoming youth inquiries.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-serif-eotc text-base font-bold text-slate-900">
-              Create New Category (አዲስ ምድብ ማከል)
-            </h2>
-            <p className="text-xs text-slate-500">
-              Add a new spiritual category so reviewers can tag incoming youth inquiries.
+
+          <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              required
+              placeholder="e.g. ቅዱሳት መጻሕፍት (Scripture), ሃይማኖተ አበው (Dogma), ሥነ-ምግባር (Christian Ethics)"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-xs text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 bg-slate-50/50 focus:bg-white"
+            />
+            <button
+              type="submit"
+              disabled={saving || !newCategory.trim()}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 hover:bg-amber-700 px-5 py-2.5 text-xs font-bold text-white disabled:opacity-50 transition-colors shadow-xs cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{saving ? "Adding..." : "Create Category"}</span>
+            </button>
+          </form>
+
+          {/* Suggested Quick Presets */}
+          <div className="pt-2">
+            <p className="text-[11px] font-semibold text-slate-500 mb-2">
+              Quick Suggestions • የተለመዱ መንፈሳዊ ምድቦች:
             </p>
+            <div className="flex flex-wrap gap-2">
+              {suggestedPresets.map((preset) => {
+                const isAlreadyAdded = categories.some(
+                  (c) => c.name.toLowerCase() === preset.toLowerCase()
+                );
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setNewCategory(preset)}
+                    disabled={isAlreadyAdded}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                      isAlreadyAdded
+                        ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+                        : "bg-amber-50/60 text-amber-900 border-amber-200 hover:bg-amber-100 hover:border-amber-300"
+                    }`}
+                    title={isAlreadyAdded ? "Already created" : `Click to use "${preset}"`}
+                  >
+                    {isAlreadyAdded ? "✓ " : "+ "}
+                    {preset}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-
-        <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            required
-            placeholder="e.g. ቅዱሳት መጻሕፍት (Scripture), ሃይማኖተ አበው (Dogma), ሥነ-ምግባር (Christian Ethics)"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-xs text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 bg-slate-50/50 focus:bg-white"
-          />
-          <button
-            type="submit"
-            disabled={saving || !newCategory.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 hover:bg-amber-700 px-5 py-2.5 text-xs font-bold text-white disabled:opacity-50 transition-colors shadow-xs cursor-pointer shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{saving ? "Adding..." : "Create Category"}</span>
-          </button>
-        </form>
-
-        {/* Suggested Quick Presets */}
-        <div className="pt-2">
-          <p className="text-[11px] font-semibold text-slate-500 mb-2">
-            Quick Suggestions • የተለመዱ መንፈሳዊ ምድቦች:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {suggestedPresets.map((preset) => {
-              const isAlreadyAdded = categories.some(
-                (c) => c.name.toLowerCase() === preset.toLowerCase()
-              );
-              return (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setNewCategory(preset)}
-                  disabled={isAlreadyAdded}
-                  className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                    isAlreadyAdded
-                      ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
-                      : "bg-amber-50/60 text-amber-900 border-amber-200 hover:bg-amber-100 hover:border-amber-300"
-                  }`}
-                  title={isAlreadyAdded ? "Already created" : `Click to use "${preset}"`}
-                >
-                  {isAlreadyAdded ? "✓ " : "+ "}
-                  {preset}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      </Can>
 
       {/* Search & Categories List */}
       <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-5">
@@ -306,17 +307,19 @@ export default function CategoriesPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                    disabled={deletingId === cat.id}
-                    className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                    title="Delete category"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                <Can permission="CATEGORIES_DELETE">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                      disabled={deletingId === cat.id}
+                      className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Delete category"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </Can>
               </div>
             ))}
           </div>

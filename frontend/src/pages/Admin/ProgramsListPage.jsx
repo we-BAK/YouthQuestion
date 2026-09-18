@@ -1,7 +1,21 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/routePaths";
 import EthiopianCross from "../../components/ui/EthiopianCross";
+import Can from "../../components/auth/Can";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+async function getAuthHeaders() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session?.access_token || ""}`,
+  };
+}
 import {
   Calendar,
   Clock,
@@ -30,8 +44,12 @@ export default function ProgramsListPage() {
   const fetchPrograms = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/programs");
-      if (!res.ok) throw new Error("Failed to load spiritual programs");
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_URL}/api/programs`, { headers });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to load spiritual programs");
+      }
       const data = await res.json();
       setPrograms(data || []);
     } catch (err) {
@@ -99,13 +117,15 @@ export default function ProgramsListPage() {
           </p>
         </div>
 
-        <Link
-          to={ROUTES.PROGRAM_CREATE}
-          className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 hover:from-amber-700 hover:to-amber-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-md shadow-amber-900/20 border border-amber-500/30"
-        >
-          <Plus className="w-4 h-4" />
-          <span>+ Create Program</span>
-        </Link>
+        <Can permission="PROGRAMS_CREATE">
+          <Link
+            to={ROUTES.PROGRAM_CREATE}
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 hover:from-amber-700 hover:to-amber-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-md shadow-amber-900/20 border border-amber-500/30"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Create Program</span>
+          </Link>
+        </Can>
       </div>
 
       {/* KPI Overview Summary Cards */}

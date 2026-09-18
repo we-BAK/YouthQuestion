@@ -1,31 +1,25 @@
-import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ROUTES } from "./routePaths";
+import { Loader2 } from "lucide-react";
+import EthiopianCross from "../components/ui/EthiopianCross";
 
 export default function ProtectedRoute() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="p-8 text-slate-500">Loading...</div>;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0a0f1d] text-slate-100">
+        <div className="relative flex items-center justify-center">
+          <EthiopianCross size={48} variant="gold" className="animate-pulse opacity-60" />
+          <Loader2 className="absolute h-14 w-14 animate-spin text-amber-500" />
+        </div>
+        <p className="text-sm font-medium text-amber-200/80 font-serif-eotc">
+          የተጠቃሚ መረጃ በማረጋገጥ ላይ...
+        </p>
+      </div>
+    );
   }
 
-  return session ? <Outlet /> : <Navigate to={ROUTES.LOGIN} replace />;
+  return user ? <Outlet /> : <Navigate to={ROUTES.LOGIN} replace />;
 }

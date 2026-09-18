@@ -43,7 +43,10 @@ export default function ProgramDetailsPage() {
   const [toast, setToast] = useState(null);
 
   const fetchQuestions = useCallback(async () => {
-    const res = await fetch(`${API_URL}/api/programs/${id}/questions`);
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/programs/${id}/questions`, {
+      headers,
+    });
     if (res.ok) {
       const data = await res.json();
       setQuestions(data || []);
