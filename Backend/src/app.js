@@ -38,7 +38,9 @@ app.use(
   auditRoutes
 );
 
-app.get("/api/program-outcomes", async (_req, res) => {
+const requirePermission = require("./middleware/requirePermission");
+
+app.get("/api/program-outcomes", requirePermission("PROGRAMS_VIEW"), async (_req, res) => {
   try {
     const outcomes = await getProgramOutcomes();
     res.json(outcomes);
@@ -47,7 +49,7 @@ app.get("/api/program-outcomes", async (_req, res) => {
   }
 });
 
-app.get("/api/categories", async (_req, res) => {
+app.get("/api/categories", requirePermission("CATEGORIES_VIEW"), async (_req, res) => {
   try {
     const categories = await getCategories();
     res.json(categories);
@@ -56,7 +58,7 @@ app.get("/api/categories", async (_req, res) => {
   }
 });
 
-app.post("/api/categories", async (req, res) => {
+app.post("/api/categories", requirePermission("CATEGORIES_CREATE"), async (req, res) => {
   try {
     const { name } = req.body;
     if (!name || !name.trim()) {

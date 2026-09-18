@@ -2,9 +2,9 @@
 const express = require("express");
 const router = express.Router();
 const { fetchAuditLogs } = require("../controllers/auditController");
-const requireSuperAdmin = require("../middleware/requireSuperAdmin");
+const requirePermission = require("../middleware/requirePermission");
 
 // GET /api/audit-logs
-router.get("/", requireSuperAdmin, fetchAuditLogs);
+router.get("/", requirePermission("AUDIT_LOGS_VIEW"), fetchAuditLogs);
 
 module.exports = router;

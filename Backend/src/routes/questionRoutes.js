@@ -11,18 +11,18 @@ const {
 } = require("../controllers/questionController");
 
 // Import middleware
-const requireSuperAdmin = require("../middleware/requireSuperAdmin");
+const requirePermission = require("../middleware/requirePermission");
 
 // GET /api/questions
-router.get("/", requireSuperAdmin, getQuestions);
+router.get("/", requirePermission("QUESTIONS_VIEW"), getQuestions);
 
 // POST /api/questions
 router.post("/", createQuestion);
 
 // POST /api/questions/:id/categories
-router.post("/:id/categories", requireSuperAdmin, addCategory);
+router.post("/:id/categories", requirePermission("QUESTIONS_CATEGORIZE"), addCategory);
 
 // DELETE /api/questions/:id/categories/:categoryId
-router.delete("/:id/categories/:categoryId", requireSuperAdmin, removeCategory);
+router.delete("/:id/categories/:categoryId", requirePermission("QUESTIONS_CATEGORIZE"), removeCategory);
 
 module.exports = router;

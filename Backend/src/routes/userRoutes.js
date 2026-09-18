@@ -7,28 +7,28 @@ const {
   bootstrapSuperAdmin,
 } = require("../controllers/userController");
 
-const requireSuperAdmin = require("../middleware/requireSuperAdmin");
+const requirePermission = require("../middleware/requirePermission");
 
 const router = express.Router();
 
 // Get all users
 router.get(
   "/",
-  requireSuperAdmin,
+  requirePermission("USERS_VIEW"),
   getUsers
 );
 
 // Get active users only
 router.get(
   "/active",
-  requireSuperAdmin,
+  requirePermission("USERS_VIEW"),
   getActiveUsersList
 );
 
 // Create a new user
 router.post(
   "/",
-  requireSuperAdmin,
+  requirePermission("USERS_CREATE"),
   createUser
 );
 

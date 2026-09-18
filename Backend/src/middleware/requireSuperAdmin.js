@@ -48,8 +48,27 @@ async function requireSuperAdmin(req, res, next) {
       });
     }
 
-    // 4. Verify user role is Super Admin
-    if (profile.role !== "Super Admin") {
+    // 4. Fetch role from DB and verify is_super_admin flag (zero hardcoding)
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        profile.role
+      );
+    let roleQuery = supabase
+      .from("roles")
+      .select("id, code, name, is_active, is_super_admin");
+    roleQuery = isUuid
+      ? roleQuery.eq("id", profile.role)
+      : roleQuery.eq("code", profile.role);
+
+    const { data: role, error: roleError } = await roleQuery.maybeSingle();
+
+    if (roleError || !role || !role.is_active) {
+      return res.status(403).json({
+        error: "Assigned role is invalid or inactive",
+      });
+    }
+
+    if (!role.is_super_admin) {
       return res.status(403).json({
         error: "Super Admin privileges required",
       });

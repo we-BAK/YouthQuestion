@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const programService = require("../services/programService");
 const { assignCategoryToProgram, getProgramQuestions } = programService;
+const requirePermission = require("../middleware/requirePermission");
 
-
-router.get("/", async (req, res) => {
+router.get("/", requirePermission("PROGRAMS_VIEW"), async (req, res) => {
   try {
     const programs = await programService.getAllPrograms(req.query);
     res.json(programs);
@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/outcomes", async (_req, res) => {
+router.get("/outcomes", requirePermission("PROGRAMS_VIEW"), async (_req, res) => {
   try {
     const outcomes = await programService.getProgramOutcomes();
     res.json(outcomes);
@@ -22,7 +22,7 @@ router.get("/outcomes", async (_req, res) => {
   }
 });
 
-router.patch("/questions/:programQuestionId", async (req, res) => {
+router.patch("/questions/:programQuestionId", requirePermission("PROGRAM_QUESTIONS_MANAGE"), async (req, res) => {
   try {
     const updated = await programService.updateQuestionOutcome(
       req.params.programQuestionId,
@@ -34,7 +34,7 @@ router.patch("/questions/:programQuestionId", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", requirePermission("PROGRAMS_CREATE"), async (req, res) => {
   try {
     const program = await programService.createProgram(req.body);
     res.status(201).json(program);
@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
 });
 
 // POST /api/programs/:id/categories — assign a category and auto-link its questions
-router.post("/:id/categories", async (req, res) => {
+router.post("/:id/categories", requirePermission("PROGRAM_QUESTIONS_MANAGE"), async (req, res) => {
   try {
     const { categoryId } = req.body;
     if (!categoryId) {
@@ -58,7 +58,7 @@ router.post("/:id/categories", async (req, res) => {
 });
 
 // GET /api/programs/:id/questions — get all questions linked to a program
-router.get("/:id/questions", async (req, res) => {
+router.get("/:id/questions", requirePermission("PROGRAMS_VIEW"), async (req, res) => {
   try {
     const questions = await getProgramQuestions(req.params.id);
     res.json(questions);
@@ -67,7 +67,7 @@ router.get("/:id/questions", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", requirePermission("PROGRAMS_VIEW"), async (req, res) => {
   try {
     const program = await programService.getProgramById(req.params.id);
     res.json(program);
