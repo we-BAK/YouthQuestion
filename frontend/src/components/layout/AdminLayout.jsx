@@ -13,7 +13,6 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
-  Bell,
   Tag,
 } from "lucide-react";
 
@@ -49,7 +48,6 @@ export default function AdminLayout() {
       label: "Ministry Dashboard",
       amharic: "ዳሽቦርድ (አጠቃላይ እይታ)",
       icon: LayoutDashboard,
-      // Dashboard accessible to all authenticated staff
     },
     {
       to: ROUTES.PROGRAMS,
@@ -113,10 +111,11 @@ export default function AdminLayout() {
       <TibebRibbon className="h-1.5 w-full fixed top-0 left-0 z-50 shadow-sm" />
 
       {/* Sidebar Navigation */}
-      <aside className="fixed inset-y-0 left-0 w-72 bg-[#0c1322] border-r border-amber-950/40 flex flex-col justify-between z-40 text-slate-300 shadow-2xl pt-1.5">
-        <div>
-          {/* Church Branding Header */}
-          <div className="p-6 border-b border-amber-500/15 bg-gradient-to-b from-[#141d33] to-[#0c1322]">
+      <aside className="fixed inset-y-0 left-0 w-72 bg-[#0c1322] border-r border-amber-950/40 flex flex-col justify-between z-40 text-slate-300 shadow-2xl pt-1.5 max-h-screen">
+        {/* Top Header & Scrollable Navigation Container */}
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Church Branding Header (Fixed top inside sidebar) */}
+          <div className="p-6 border-b border-amber-500/15 bg-gradient-to-b from-[#141d33] to-[#0c1322] shrink-0">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/30 shadow-inner">
                 <EthiopianCross size={34} variant="gold" />
@@ -138,8 +137,8 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          {/* Navigation Items */}
-          <nav className="p-4 space-y-1.5">
+          {/* Scrollable Navigation Items */}
+          <nav className="p-4 space-y-1.5 overflow-y-auto flex-1 min-h-0 custom-sidebar-scrollbar">
             <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
               Ministry Operations
             </p>
@@ -185,8 +184,8 @@ export default function AdminLayout() {
           </nav>
         </div>
 
-        {/* User Status & Sign Out Footer */}
-        <div className="p-4 border-t border-slate-800 bg-[#080d18]/60 space-y-3">
+        {/* User Status & Sign Out Footer (Pinned to bottom) */}
+        <div className="p-4 border-t border-slate-800 bg-[#080d18]/60 space-y-3 shrink-0">
           <div className="flex items-center gap-3 px-2 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-600 to-rose-800 flex items-center justify-center text-white font-bold text-xs shadow-md border border-amber-400/30">
               {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : "E"}
