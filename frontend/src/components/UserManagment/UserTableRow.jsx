@@ -1,86 +1,199 @@
-export default function UserTableRow({ user }) {
+import {
+  UserRound,
+  UserCheck,
+  UserX,
+} from "lucide-react";
+
+export default function UserTableRow({
+  user,
+  onStatusChange,
+  statusUpdating,
+}) {
   const isActive = user.status === "Active";
 
+  const displayName =
+    user.name ||
+    user.full_name ||
+    "Unknown User";
+
+  const roleName =
+    user.role_name ||
+    user.role ||
+    "User";
+
+  const registrationDate =
+    user.created ||
+    user.created_at;
+
+  function formatDate(date) {
+    if (!date) {
+      return "—";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleDateString(
+      "en-GB",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }
+    );
+  }
+
+  function getInitials(name) {
+    if (!name) {
+      return "?";
+    }
+
+    const parts = name
+      .trim()
+      .split(/\s+/);
+
+    if (parts.length === 1) {
+      return parts[0]
+        .charAt(0)
+        .toUpperCase();
+    }
+
+    return (
+      parts[0].charAt(0) +
+      parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+  }
+
+  function formatRole(role) {
+    if (!role) {
+      return "User";
+    }
+
+    const roleMap = {
+      SUPER_ADMIN: "Super Admin",
+      ADMIN: "Admin",
+      REVIEWER: "Reviewer",
+      PROGRAM_COORDINATOR:
+        "Program Coordinator",
+    };
+
+    return (
+      roleMap[role] ||
+      role
+        .toLowerCase()
+        .split("_")
+        .map(
+          (word) =>
+            word.charAt(0).toUpperCase() +
+            word.slice(1)
+        )
+        .join(" ")
+    );
+  }
+
   return (
-    <tr className="hover:bg-amber-50/20 transition">
-
-      {/* User */}
-      <td className="px-6 py-4 font-medium text-slate-900">
-
+    <tr className="hover:bg-slate-50/70 transition-colors">
+      {/* ==========================================
+          USER
+          ========================================== */}
+      <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-            {(user.full_name || "U")
-              .charAt(0)
-              .toUpperCase()}
+          <div className="w-9 h-9 rounded-full bg-orange-600 text-white flex items-center justify-center text-sm font-semibold shrink-0">
+            {getInitials(displayName)}
           </div>
 
-          <div>
+          <div className="min-w-0">
+            <p className="font-medium text-slate-900 truncate">
+              {displayName}
+            </p>
 
-            <div className="font-semibold text-slate-900">
-              {user.full_name || "N/A"}
-            </div>
-
-            
-
+            {user.email && (
+              <p className="text-xs text-slate-400 truncate">
+                {user.email}
+              </p>
+            )}
           </div>
-
         </div>
-
       </td>
 
-      {/* Role */}
+      {/* ==========================================
+          MINISTRY ROLE
+          ========================================== */}
       <td className="px-6 py-4">
-
-        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">
-          {formatRole(user.role)}
+        <span className="inline-flex items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+          {formatRole(roleName)}
         </span>
-
       </td>
 
-      {/* Status */}
+      {/* ==========================================
+          STATUS
+          ========================================== */}
       <td className="px-6 py-4">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${
+            isActive
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-slate-200 bg-slate-100 text-slate-600"
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              isActive
+                ? "bg-emerald-500"
+                : "bg-slate-400"
+            }`}
+          />
 
-        {isActive ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-
-            Active
-
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-
-            <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-
-            Inactive
-
-          </span>
-        )}
-
+          {isActive
+            ? "Active"
+            : "Inactive"}
+        </span>
       </td>
 
-      {/* Registration Date */}
-      <td className="px-6 py-4 text-xs text-slate-500">
-        {user.created_at
-          ? new Date(user.created_at).toLocaleDateString()
-          : "—"}
+      {/* ==========================================
+          REGISTRATION DATE
+          ========================================== */}
+      <td className="px-6 py-4 text-slate-500">
+        {formatDate(registrationDate)}
       </td>
 
+      {/* ==========================================
+          ACTIONS
+          ========================================== */}
+      <td className="px-6 py-4">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() =>
+              onStatusChange(user)
+            }
+            disabled={
+              statusUpdating ||
+              !onStatusChange
+            }
+            className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+              isActive
+                ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+            }`}
+          >
+            {isActive ? (
+              <>
+                <UserX size={14} />
+                Deactivate
+              </>
+            ) : (
+              <>
+                <UserCheck size={14} />
+                Activate
+              </>
+            )}
+          </button>
+        </div>
+      </td>
     </tr>
   );
-}
-
-function formatRole(role) {
-  if (!role) return "N/A";
-
-  const roleNames = {
-    SUPER_ADMIN: "Super Admin",
-    ADMIN: "Admin",
-    REVIEWER: "Reviewer",
-    PROGRAM_COORDINATOR: "Program Coordinator",
-  };
-
-  return roleNames[role] || role;
 }
