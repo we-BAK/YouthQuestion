@@ -1,6 +1,7 @@
 const {
   getAllUsers,
-  getActiveUsers, // <-- Imported service function
+  getActiveUsers, 
+  updateUserStatus:updateUserStatusService,
   createNewUser,
   createFirstSuperAdmin,
 } = require("../services/userService");
@@ -68,9 +69,37 @@ async function bootstrapSuperAdmin(req, res) {
   }
 }
 
+// ==========================================
+// Update user status
+// ==========================================
+async function updateUserStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["Active", "Inactive"].includes(status)) {
+      return res.status(400).json({
+        error: "Status must be either Active or Inactive.",
+      });
+    }
+
+    const updatedUser = await updateUserStatusService(
+      id,
+      status
+    );
+
+    return res.json(updatedUser);
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   getUsers,
-  getActiveUsersList, // <-- Exported
+  getActiveUsersList,
   createUser,
   bootstrapSuperAdmin,
+  updateUserStatus,
 };

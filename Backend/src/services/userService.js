@@ -1,5 +1,3 @@
-// src/services/userService.js
-
 const supabase = require("../config/supabase");
 
 // ==========================================
@@ -15,7 +13,7 @@ async function getAllUsers() {
     throw new Error(error.message);
   }
 
-  return data;
+  return data || [];
 }
 
 // ==========================================
@@ -30,6 +28,41 @@ async function getActiveUsers() {
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+// ==========================================
+// Update user status
+// Active <-> Inactive
+// ==========================================
+async function updateUserStatus(userId, status) {
+  if (!userId) {
+    throw new Error("User ID is required.");
+  }
+
+  if (!["Active", "Inactive"].includes(status)) {
+    throw new Error(
+      "Status must be either Active or Inactive."
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .update({
+      status,
+    })
+    .eq("id", userId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("User not found.");
   }
 
   return data;
@@ -60,7 +93,10 @@ async function createNewUser(userData) {
   // ------------------------------------------
   // 1. Get the selected role from DB
   // ------------------------------------------
-  const { data: roleData, error: roleError } = await supabase
+  const {
+    data: roleData,
+    error: roleError,
+  } = await supabase
     .from("roles")
     .select("id, code, name")
     .eq("code", role)
@@ -101,10 +137,7 @@ async function createNewUser(userData) {
       {
         id: authData.user.id,
         full_name: fullName,
-
-        // Store the selected DB role
         role: roleData.code,
-
         status: status || "Active",
       },
     ])
@@ -112,7 +145,7 @@ async function createNewUser(userData) {
     .single();
 
   // ------------------------------------------
-  // 4. Cleanup Auth user if profile creation fails
+  // 4. Cleanup Auth user if profile fails
   // ------------------------------------------
   if (profileError) {
     await supabase.auth.admin.deleteUser(
@@ -133,24 +166,41 @@ async function createNewUser(userData) {
 }
 
 // ==========================================
-// Create first Super Admin (bootstrap)
-// Protected by a secret header key
+// Create first Super Admin
+// Protected by bootstrap secret
 // ==========================================
 async function createFirstSuperAdmin(userData, secret) {
-  const BOOTSTRAP_SECRET = process.env.BOOTSTRAP_SECRET;
+  const BOOTSTRAP_SECRET =
+    process.env.BOOTSTRAP_SECRET;
 
-  if (!BOOTSTRAP_SECRET || secret !== BOOTSTRAP_SECRET) {
-    throw new Error("Invalid or missing bootstrap secret.");
+  if (
+    !BOOTSTRAP_SECRET ||
+    secret !== BOOTSTRAP_SECRET
+  ) {
+    throw new Error(
+      "Invalid or missing bootstrap secret."
+    );
   }
 
-  const { email, password, fullName } = userData;
+  const {
+    email,
+    password,
+    fullName,
+  } = userData;
 
   if (!email || !password || !fullName) {
-    throw new Error("Email, password, and full name are required.");
+    throw new Error(
+      "Email, password, and full name are required."
+    );
   }
 
-  // 1. Resolve Super Admin role from DB (no hardcoding)
-  const { data: roleData, error: roleError } = await supabase
+  // ------------------------------------------
+  // 1. Resolve Super Admin role from DB
+  // ------------------------------------------
+  const {
+    data: roleData,
+    error: roleError,
+  } = await supabase
     .from("roles")
     .select("id, code, name")
     .eq("is_super_admin", true)
@@ -163,20 +213,29 @@ async function createFirstSuperAdmin(userData, secret) {
     );
   }
 
+  // ------------------------------------------
   // 2. Create Supabase Auth user
-  const { data: authData, error: authError } =
-    await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
+  // ------------------------------------------
+  const {
+    data: authData,
+    error: authError,
+  } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
 
   if (authError) {
     throw new Error(authError.message);
   }
 
-  // 3. Create user profile with the DB role code
-  const { data: profileData, error: profileError } = await supabase
+  // ------------------------------------------
+  // 3. Create user profile
+  // ------------------------------------------
+  const {
+    data: profileData,
+    error: profileError,
+  } = await supabase
     .from("user_profiles")
     .insert([
       {
@@ -189,12 +248,20 @@ async function createFirstSuperAdmin(userData, secret) {
     .select()
     .single();
 
+  // ------------------------------------------
+  // 4. Rollback Auth user if profile fails
+  // ------------------------------------------
   if (profileError) {
-    // Rollback auth user if profile creation fails
-    await supabase.auth.admin.deleteUser(authData.user.id);
+    await supabase.auth.admin.deleteUser(
+      authData.user.id
+    );
+
     throw new Error(profileError.message);
   }
 
+  // ------------------------------------------
+  // 5. Return created user
+  // ------------------------------------------
   return {
     ...profileData,
     email: authData.user.email,
@@ -208,6 +275,7 @@ async function createFirstSuperAdmin(userData, secret) {
 module.exports = {
   getAllUsers,
   getActiveUsers,
+  updateUserStatus,
   createNewUser,
   createFirstSuperAdmin,
 };
