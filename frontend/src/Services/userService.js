@@ -26,56 +26,138 @@ export async function getUsers() {
   const result = await response.json();
 
   if (!response.ok) {
-    throw new Error(result.error || "Unable to load users");
+    throw new Error(
+      result.error || "Unable to load users"
+    );
   }
 
   // Normalize backend data
   return result.map((user) => ({
     ...user,
-    name: user.name || user.full_name || user.fullName,
+    name:
+      user.name ||
+      user.full_name ||
+      user.fullName,
     email: user.email,
-    role: user.role || user.role_name || "User",
-    status: user.status || (user.is_active ? "Active" : "Inactive"),
-    created: user.created || user.created_at,
-    lastLogin: user.lastLogin || user.last_login,
+    role:
+      user.role ||
+      user.role_name ||
+      "User",
+    status:
+      user.status ||
+      (user.is_active
+        ? "Active"
+        : "Inactive"),
+    created:
+      user.created ||
+      user.created_at,
+    lastLogin:
+      user.lastLogin ||
+      user.last_login,
   }));
 }
 
 // Get active users only
 export async function getActiveUsers() {
-  const response = await fetch(`${API_URL}/api/users/active`, {
-    headers: await getAuthHeaders(),
-  });
+  const response = await fetch(
+    `${API_URL}/api/users/active`,
+    {
+      headers: await getAuthHeaders(),
+    }
+  );
 
   const result = await response.json();
 
   if (!response.ok) {
-    throw new Error(result.error || "Unable to load active users");
+    throw new Error(
+      result.error ||
+        "Unable to load active users"
+    );
   }
 
   return result.map((user) => ({
     ...user,
-    name: user.name || user.full_name || user.fullName,
+    name:
+      user.name ||
+      user.full_name ||
+      user.fullName,
     email: user.email,
-    role: user.role || user.role_name || "User",
-    status: user.status || (user.is_active ? "Active" : "Inactive"),
-    created: user.created || user.created_at,
-    lastLogin: user.lastLogin || user.last_login,
+    role:
+      user.role ||
+      user.role_name ||
+      "User",
+    status:
+      user.status ||
+      (user.is_active
+        ? "Active"
+        : "Inactive"),
+    created:
+      user.created ||
+      user.created_at,
+    lastLogin:
+      user.lastLogin ||
+      user.last_login,
   }));
 }
 
 // Register a new user
 export async function createUser(payload) {
-  const response = await fetch(`${API_URL}/api/users`, {
-    method: "POST",
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(payload),
-  });
+  const response = await fetch(
+    `${API_URL}/api/users`,
+    {
+      method: "POST",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
 
   const result = await response.json();
 
   if (!response.ok) {
-    throw new Error(result.error || "Unable to create user");
+    throw new Error(
+      result.error ||
+        "Unable to create user"
+    );
+  }
+
+  return result;
+}
+
+// Update user status
+export async function updateUserStatus(
+  userId,
+  status
+) {
+  if (!userId) {
+    throw new Error("User ID is required.");
+  }
+
+  if (
+    !["Active", "Inactive"].includes(status)
+  ) {
+    throw new Error(
+      "Status must be either Active or Inactive."
+    );
+  }
+
+  const response = await fetch(
+    `${API_URL}/api/users/${userId}/status`,
+    {
+      method: "PATCH",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({
+        status,
+      }),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Unable to update user status"
+    );
   }
 
   return result;

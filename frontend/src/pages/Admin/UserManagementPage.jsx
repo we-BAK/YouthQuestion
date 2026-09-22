@@ -4,6 +4,7 @@ import {
   createUser,
   getUsers,
   getActiveUsers,
+  updateUserStatus,
 } from "../../Services/userService";
 
 import { getRoles } from "../../Services/rolePermissionService";
@@ -19,12 +20,16 @@ export default function UserManagementPage() {
   const [roles, setRoles] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [rolesLoading, setRolesLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] =
+    useState(true);
   const [saving, setSaving] = useState(false);
+  const [statusUpdating, setStatusUpdating] =
+    useState(false);
 
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [showRegisterForm, setShowRegisterForm] =
+    useState(false);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -51,10 +56,9 @@ export default function UserManagementPage() {
 
       setUsers(registeredUsers || []);
     } catch (err) {
-      console.error("Failed to load users:", err);
-
       setError(
-        err.message || "Failed to load authorized users."
+        err.message ||
+          "Failed to load authorized users."
       );
     } finally {
       setLoading(false);
@@ -72,7 +76,9 @@ export default function UserManagementPage() {
 
       const roleData = await getRoles();
 
-      const activeRoles = (roleData || []).filter(
+      const activeRoles = (
+        roleData || []
+      ).filter(
         (role) => role.is_active === true
       );
 
@@ -81,12 +87,12 @@ export default function UserManagementPage() {
       if (activeRoles.length > 0) {
         setForm((previousForm) => ({
           ...previousForm,
-          role: previousForm.role || activeRoles[0].code,
+          role:
+            previousForm.role ||
+            activeRoles[0].code,
         }));
       }
     } catch (err) {
-      console.error("Failed to load roles:", err);
-
       setError(
         err.message || "Failed to load roles."
       );
@@ -118,7 +124,10 @@ export default function UserManagementPage() {
       fullName: "",
       email: "",
       password: "",
-      role: roles.length > 0 ? roles[0].code : "",
+      role:
+        roles.length > 0
+          ? roles[0].code
+          : "",
       status: "Active",
     });
 
@@ -146,7 +155,9 @@ export default function UserManagementPage() {
     }
 
     if (!form.email.trim()) {
-      setError("Email address is required.");
+      setError(
+        "Email address is required."
+      );
       return;
     }
 
@@ -171,7 +182,9 @@ export default function UserManagementPage() {
         status: form.status,
       });
 
-      await loadUsers(activeTab === "active");
+      await loadUsers(
+        activeTab === "active"
+      );
 
       setShowRegisterForm(false);
 
@@ -179,17 +192,65 @@ export default function UserManagementPage() {
         fullName: "",
         email: "",
         password: "",
-        role: roles.length > 0 ? roles[0].code : "",
+        role:
+          roles.length > 0
+            ? roles[0].code
+            : "",
         status: "Active",
       });
     } catch (err) {
-      console.error("Failed to create user:", err);
-
       setError(
-        err.message || "Failed to create user."
+        err.message ||
+          "Failed to create user."
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  // ------------------------------------------
+  // Activate / Deactivate user
+  // ------------------------------------------
+
+  async function handleStatusChange(user) {
+    const isCurrentlyActive =
+      user.status === "Active";
+
+    const newStatus = isCurrentlyActive
+      ? "Inactive"
+      : "Active";
+
+    const action = isCurrentlyActive
+      ? "deactivate"
+      : "activate";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to ${action} ${user.name}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setStatusUpdating(true);
+      setError("");
+
+      await updateUserStatus(
+        user.id,
+        newStatus
+      );
+
+      await loadUsers(
+        activeTab === "active"
+      );
+    } catch (err) {
+      setError(
+        err.message ||
+          `Failed to ${action} user.`
+      );
+    } finally {
+      setStatusUpdating(false);
     }
   }
 
@@ -236,6 +297,8 @@ export default function UserManagementPage() {
       <UserTable
         users={users}
         loading={loading}
+        onStatusChange={handleStatusChange}
+        statusUpdating={statusUpdating}
       />
 
       <RegisterUserModal

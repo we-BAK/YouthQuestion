@@ -4,6 +4,8 @@ import UserTableRow from "./UserTableRow";
 export default function UserTable({
   users,
   loading,
+  onStatusChange,
+  statusUpdating,
 }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-slate-200/90 bg-white shadow-sm">
@@ -48,6 +50,10 @@ export default function UserTable({
                 Registration Date
               </th>
 
+              <th className="px-6 py-3.5 text-right">
+                Actions
+              </th>
+
             </tr>
           </thead>
 
@@ -56,6 +62,8 @@ export default function UserTable({
               <UserTableRow
                 key={user.id}
                 user={user}
+                onStatusChange={onStatusChange}
+                statusUpdating={statusUpdating}
               />
             ))}
           </tbody>
