@@ -1,132 +1,159 @@
-const supabase = require("../config/supabase");
+import { supabase } from "../lib/supabase";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 // ==========================================
-// Get all users
+// Get authentication headers
 // ==========================================
-async function getAllUsers() {
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .order("created_at", { ascending: false });
+async function getAuthHeaders() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (error) {
-    throw new Error(error.message);
+  if (!session) {
+    throw new Error("Please sign in first.");
   }
 
-  return data || [];
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.access_token}`,
+  };
+}
+
+// ==========================================
+// Normalize user data
+// ==========================================
+function normalizeUser(user) {
+  return {
+    ...user,
+    name:
+      user.name ||
+      user.full_name ||
+      user.fullName ||
+      "Unknown User",
+
+    email: user.email || "",
+
+    role:
+      user.role ||
+      user.role_name ||
+      "User",
+
+    status:
+      user.status ||
+      (user.is_active
+        ? "Active"
+        : "Inactive"),
+
+    created:
+      user.created ||
+      user.created_at ||
+      null,
+
+    lastLogin:
+      user.lastLogin ||
+      user.last_login ||
+      null,
+  };
+}
+
+// ==========================================
+// Get all registered users
+// ==========================================
+export async function getUsers() {
+  const response = await fetch(
+    `${API_URL}/api/users`,
+    {
+      method: "GET",
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Unable to load users."
+    );
+  }
+
+  if (!Array.isArray(result)) {
+    throw new Error(
+      "Invalid users response from server."
+    );
+  }
+
+  return result.map(normalizeUser);
 }
 
 // ==========================================
 // Get active users only
 // ==========================================
-async function getActiveUsers() {
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("status", "Active")
-    .order("created_at", { ascending: false });
+export async function getActiveUsers() {
+  const response = await fetch(
+    `${API_URL}/api/users/active`,
+    {
+      method: "GET",
+      headers: await getAuthHeaders(),
+    }
+  );
 
-  if (error) {
-    throw new Error(error.message);
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Unable to load active users."
+    );
   }
 
-  return data || [];
+  if (!Array.isArray(result)) {
+    throw new Error(
+      "Invalid active users response from server."
+    );
+  }
+
+  return result.map(normalizeUser);
 }
 
 // ==========================================
-// Create a new user
+// Register a new user
 // ==========================================
-async function createNewUser(userData) {
-  const {
-    email,
-    password,
-    role,
-    fullName,
-    status,
-  } = userData;
+export async function createUser(payload) {
+  const response = await fetch(
+    `${API_URL}/api/users`,
+    {
+      method: "POST",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
 
-  if (!email || !password || !fullName || !role) {
+  const result = await response.json();
+
+  if (!response.ok) {
     throw new Error(
-      "Email, password, full name, and role are required."
+      result.error ||
+        "Unable to create user."
     );
   }
 
-  // Verify that the selected role exists
-  // and is currently active.
-  const {
-    data: roleData,
-    error: roleError,
-  } = await supabase
-    .from("roles")
-    .select("id, code, name")
-    .eq("code", role)
-    .eq("is_active", true)
-    .single();
-
-  if (roleError || !roleData) {
-    throw new Error(
-      "The selected role is invalid or inactive."
-    );
-  }
-
-  // Create the authentication account
-  const {
-    data: authData,
-    error: authError,
-  } = await supabase.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
-
-  if (authError) {
-    throw new Error(authError.message);
-  }
-
-  // Create the application profile
-  const {
-    data: profileData,
-    error: profileError,
-  } = await supabase
-    .from("user_profiles")
-    .insert([
-      {
-        id: authData.user.id,
-        full_name: fullName,
-        role: roleData.code,
-        status: status || "Active",
-      },
-    ])
-    .select()
-    .single();
-
-  // If profile creation fails,
-  // remove the Auth account as cleanup.
-  if (profileError) {
-    await supabase.auth.admin.deleteUser(
-      authData.user.id
-    );
-
-    throw new Error(profileError.message);
-  }
-
-  return {
-    ...profileData,
-    email: authData.user.email,
-    role_name: roleData.name,
-  };
+  return result;
 }
 
 // ==========================================
 // Update user status
 // Active <-> Inactive
 // ==========================================
-async function updateUserStatus(
+export async function updateUserStatus(
   userId,
   status
 ) {
   if (!userId) {
-    throw new Error("User ID is required.");
+    throw new Error(
+      "User ID is required."
+    );
   }
 
   if (
@@ -137,131 +164,25 @@ async function updateUserStatus(
     );
   }
 
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("user_profiles")
-    .update({
-      status,
-    })
-    .eq("id", userId)
-    .select()
-    .single();
+  const response = await fetch(
+    `${API_URL}/api/users/${userId}/status`,
+    {
+      method: "PATCH",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({
+        status,
+      }),
+    }
+  );
 
-  if (error) {
-    throw new Error(error.message);
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Unable to update user status."
+    );
   }
 
-  if (!data) {
-    throw new Error("User not found.");
-  }
-
-  return data;
+  return normalizeUser(result);
 }
-
-// ==========================================
-// Create the first Super Admin
-// ==========================================
-async function createFirstSuperAdmin(
-  userData,
-  secret
-) {
-  const BOOTSTRAP_SECRET =
-    process.env.BOOTSTRAP_SECRET;
-
-  if (
-    !BOOTSTRAP_SECRET ||
-    secret !== BOOTSTRAP_SECRET
-  ) {
-    throw new Error(
-      "Invalid or missing bootstrap secret."
-    );
-  }
-
-  const {
-    email,
-    password,
-    fullName,
-  } = userData;
-
-  if (!email || !password || !fullName) {
-    throw new Error(
-      "Email, password, and full name are required."
-    );
-  }
-
-  // Find the active Super Admin role
-  const {
-    data: roleData,
-    error: roleError,
-  } = await supabase
-    .from("roles")
-    .select("id, code, name")
-    .eq("is_super_admin", true)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  if (roleError || !roleData) {
-    throw new Error(
-      "No active Super Admin role found in the database. Please seed the roles table first."
-    );
-  }
-
-  // Create Auth account
-  const {
-    data: authData,
-    error: authError,
-  } = await supabase.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
-
-  if (authError) {
-    throw new Error(authError.message);
-  }
-
-  // Create profile
-  const {
-    data: profileData,
-    error: profileError,
-  } = await supabase
-    .from("user_profiles")
-    .insert([
-      {
-        id: authData.user.id,
-        full_name: fullName,
-        role: roleData.code,
-        status: "Active",
-      },
-    ])
-    .select()
-    .single();
-
-  // Cleanup Auth account if profile creation fails
-  if (profileError) {
-    await supabase.auth.admin.deleteUser(
-      authData.user.id
-    );
-
-    throw new Error(profileError.message);
-  }
-
-  return {
-    ...profileData,
-    email: authData.user.email,
-    role_name: roleData.name,
-  };
-}
-
-// ==========================================
-// Exports
-// ==========================================
-module.exports = {
-  getAllUsers,
-  getActiveUsers,
-  updateUserStatus,
-  createNewUser,
-  createFirstSuperAdmin,
-};
