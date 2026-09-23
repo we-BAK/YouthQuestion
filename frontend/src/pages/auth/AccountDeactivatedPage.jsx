@@ -1,5 +1,6 @@
 import {
   ShieldX,
+  Mail,
   LogOut,
 } from "lucide-react";
 
@@ -13,59 +14,63 @@ export default function AccountDeactivatedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-lg p-8 text-center">
+    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
+      <div className="w-full max-w-lg">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-lg p-10 text-center">
 
           {/* Icon */}
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-rose-50">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-rose-50">
             <ShieldX
-              size={32}
+              size={40}
               className="text-rose-600"
             />
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-semibold text-slate-900">
+          <h1 className="mt-6 text-2xl font-semibold text-slate-900">
             Account Deactivated
           </h1>
 
           {/* Message */}
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Your account has been deactivated by an
-            administrator.
+            Your account has been deactivated by
+            the system administrator.
           </p>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            You no longer have access to the EOTC
-            Youth Ministry management portal.
+            You currently do not have access to the
+            EOTC Youth Ministry portal.
           </p>
 
-          {/* Notice */}
-          <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-left">
-            <p className="text-sm font-medium text-rose-800">
-              Need access again?
-            </p>
+          {/* Contact Admin */}
+          <div className="mt-7 rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <div className="flex items-center justify-center gap-2 text-amber-800">
+              <Mail size={18} />
 
-            <p className="mt-1 text-xs leading-5 text-rose-700">
-              Please contact a system administrator
-              if you believe your account was
-              deactivated by mistake.
+              <span className="text-sm font-semibold">
+                Contact the Administrator
+              </span>
+            </div>
+
+            <p className="mt-2 text-xs leading-5 text-amber-700">
+              Please contact the system administrator
+              if you believe your account should be
+              reactivated.
             </p>
           </div>
 
-          {/* Logout */}
+          {/* Sign Out */}
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            <LogOut size={16} />
+            <LogOut size={17} />
             Sign Out
           </button>
 
         </div>
       </div>
-    </div>
+    </main>
   );
 }
