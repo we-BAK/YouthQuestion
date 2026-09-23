@@ -1,5 +1,6 @@
 export const ROUTES = {
   LOGIN: "/login",
+  ACCOUNT_DEACTIVATED: "/account-deactivated",
 
   ADMIN: "/admin",
 

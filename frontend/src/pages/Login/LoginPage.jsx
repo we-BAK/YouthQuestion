@@ -14,11 +14,42 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    let isMounted = true;
+
+    async function checkSession() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session || !isMounted) return;
+
+      try {
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("status")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!isMounted) return;
+
+        if (profile?.status === "Inactive") {
+          navigate(ROUTES.ACCOUNT_DEACTIVATED, { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error("Error checking user status on login:", err);
+      }
+
+      if (isMounted) {
         navigate(ROUTES.DASHBOARD, { replace: true });
       }
-    });
+    }
+
+    checkSession();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   async function handleLogin(event) {
@@ -38,6 +69,21 @@ export default function LoginPage() {
       }
 
       if (data?.session) {
+        try {
+          const { data: profile } = await supabase
+            .from("user_profiles")
+            .select("status")
+            .eq("id", data.session.user.id)
+            .single();
+
+          if (profile?.status === "Inactive") {
+            navigate(ROUTES.ACCOUNT_DEACTIVATED, { replace: true });
+            return;
+          }
+        } catch (statusErr) {
+          console.error("Error checking profile status:", statusErr);
+        }
+
         navigate(ROUTES.DASHBOARD, { replace: true });
       }
     } catch (err) {

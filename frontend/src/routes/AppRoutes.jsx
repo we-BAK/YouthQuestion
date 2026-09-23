@@ -12,6 +12,7 @@ import CreateProgramPage from "../pages/Admin/CreateProgramPage";
 import ProgramDetailsPage from "../pages/Admin/ProgramDetailsPage";
 import RolesPermissionsPage from "../pages/Admin/roles-permissions";
 import AccessDenied from "../pages/Admin/AccessDenied";
+import AccountDeactivatedPage from "../pages/auth/AccountDeactivatedPage";
 import ProtectedRoute from "./ProtectedRoute";
 import PermissionRoute from "./PermissionRoute";
 import { ROUTES } from "./routePaths";
@@ -21,6 +22,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+      <Route path={ROUTES.ACCOUNT_DEACTIVATED} element={<AccountDeactivatedPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path={ROUTES.ADMIN} element={<AdminLayout />}>
