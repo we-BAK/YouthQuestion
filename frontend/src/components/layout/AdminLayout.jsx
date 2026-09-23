@@ -1,8 +1,8 @@
+import React, { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "../../routes/routePaths";
 import { useAuth } from "../../context/AuthContext";
 import EthiopianCross from "../ui/EthiopianCross";
-import TibebRibbon from "../ui/TibebRibbon";
 import {
   LayoutDashboard,
   Calendar,
@@ -14,12 +14,34 @@ import {
   ChevronRight,
   ShieldCheck,
   Tag,
+  Menu,
+  X,
+  Sparkles,
+  ChevronDown,
 } from "lucide-react";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, role, hasPermission, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
 
   async function handleLogout() {
     await logout();
@@ -29,30 +51,30 @@ export default function AdminLayout() {
   // Get current page title based on route
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path.includes("/admin/dashboard")) return "Spiritual Ministry Dashboard";
-    if (path.includes("/admin/programs/new")) return "Create New Program";
-    if (path.match(/\/admin\/programs\/\d+/)) return "Program Details & Questions";
-    if (path.includes("/admin/programs")) return "Spiritual Programs & Gatherings";
-    if (path.includes("/admin/questions")) return "Youth Inquiries & Questions Review";
-    if (path.includes("/admin/categories")) return "Question Categories & Taxonomies";
-    if (path.includes("/admin/users")) return "User & Clergy Management";
-    if (path.includes("/admin/audit-logs")) return "System Audit History";
-    if (path.includes("/admin/roles-permissions")) return "Roles & Permissions Management";
-    if (path.includes("/admin/settings")) return "Platform Settings & Security";
-    return "Administration Portal";
+    if (path.includes("/admin/dashboard")) return "Dashboard";
+    if (path.includes("/admin/programs/new")) return "Create Program";
+    if (path.match(/\/admin\/programs\/\d+/)) return "Program Details";
+    if (path.includes("/admin/programs")) return "Programs & Gatherings";
+    if (path.includes("/admin/questions")) return "Questions Review";
+    if (path.includes("/admin/categories")) return "Categories";
+    if (path.includes("/admin/users")) return "User Management";
+    if (path.includes("/admin/audit-logs")) return "Audit Logs";
+    if (path.includes("/admin/roles-permissions")) return "Roles & Permissions";
+    if (path.includes("/admin/settings")) return "Settings";
+    return "Portal";
   };
 
   const navItems = [
     {
       to: ROUTES.DASHBOARD,
-      label: "Ministry Dashboard",
-      amharic: "ዳሽቦርድ (አጠቃላይ እይታ)",
+      label: "Dashboard",
+      amharic: "አጠቃላይ እይታ",
       icon: LayoutDashboard,
     },
     {
       to: ROUTES.PROGRAMS,
-      label: "Programs Management",
-      amharic: "የመርሐ-ግብር አስተዳደር",
+      label: "Programs",
+      amharic: "መርሐ-ግብራት",
       icon: Calendar,
       permission: "PROGRAMS_VIEW",
     },
@@ -65,22 +87,22 @@ export default function AdminLayout() {
     },
     {
       to: ROUTES.CATEGORIES,
-      label: "Question Categories",
-      amharic: "የጥያቄ ምድቦች (ማደራጃ)",
+      label: "Categories",
+      amharic: "የጥያቄ ምድቦች",
       icon: Tag,
       permission: "CATEGORIES_VIEW",
     },
     {
       to: ROUTES.USERS,
-      label: "User Management",
+      label: "Users & Clergy",
       amharic: "የአባላት አስተዳደር",
       icon: Users,
       permission: "USERS_VIEW",
     },
     {
       to: ROUTES.ROLES_PERMISSIONS,
-      label: "Roles & Permissions",
-      amharic: "የሚናና ፈቃዶች አስተዳደር",
+      label: "Roles & Access",
+      amharic: "ሚናና ፈቃዶች",
       icon: ShieldCheck,
       permission: "ROLES_VIEW",
     },
@@ -93,54 +115,77 @@ export default function AdminLayout() {
     },
     {
       to: ROUTES.SETTINGS,
-      label: "Settings & Security",
-      amharic: "ቅንብሮችና ደህንነት",
+      label: "Settings",
+      amharic: "ቅንብሮች",
       icon: Settings,
       permission: "SETTINGS_VIEW",
     },
   ];
 
-  // Dynamically filter items so revoked permissions immediately remove links
   const visibleNavItems = navItems.filter(
     (item) => !item.permission || hasPermission(item.permission)
   );
 
   return (
-    <div className="min-h-screen bg-[#f8f6f1] flex flex-col text-slate-800">
-      {/* Top Traditional Tibeb Ribbon Accent */}
-      <TibebRibbon className="h-1.5 w-full fixed top-0 left-0 z-50 shadow-sm" />
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col text-slate-800 antialiased font-sans">
+      
+      {/* Mobile Backdrop Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-200"
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Sidebar Navigation */}
-      <aside className="fixed inset-y-0 left-0 w-72 bg-[#0c1322] border-r border-amber-950/40 flex flex-col justify-between z-40 text-slate-300 shadow-2xl pt-1.5 max-h-screen">
-        {/* Top Header & Scrollable Navigation Container */}
+      {/* Sidebar Navigation (Linear / Stripe Executive Style) */}
+      <aside
+        className={`fixed inset-y-0 left-0 w-72 bg-[#090d16] border-r border-slate-800/60 flex flex-col justify-between z-50 text-slate-300 shadow-2xl max-h-screen transition-transform duration-200 ease-in-out ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        {/* Top Header & Navigation */}
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          {/* Church Branding Header (Fixed top inside sidebar) */}
-          <div className="p-6 border-b border-amber-500/15 bg-gradient-to-b from-[#141d33] to-[#0c1322] shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/30 shadow-inner">
-                <EthiopianCross size={34} variant="gold" />
+          
+          {/* Executive Brand Header */}
+          <div className="px-5 py-4 border-b border-slate-800/60 bg-[#070a12] shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                  <EthiopianCross size={22} variant="gold" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold tracking-tight text-white leading-tight">
+                    EOTC Youth Ministry
+                  </h2>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    Review & Gathering Portal
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-serif-eotc text-base font-bold tracking-wide text-amber-300 leading-tight">
-                  EOTC Youth Ministry
-                </h2>
-                <p className="text-[11px] text-amber-200/70 font-medium tracking-wider">
-                  የኢ/ኦ/ተ/ቤ/ክ ወጣቶች መድረክ
-                </p>
-              </div>
+
+              {/* Close Button on Mobile */}
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+                aria-label="Close menu"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Liturgical Motto Pill */}
-            <div className="mt-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span>✞ በእምነትና በምግባር ማነጽ</span>
+            {/* Liturgical Tag */}
+            <div className="mt-3 flex items-center justify-between px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[10px] text-amber-300/80 font-medium">
+              <span className="truncate">✞ በእምነትና በምግባር ማነጽ</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 ml-1" />
             </div>
           </div>
 
-          {/* Scrollable Navigation Items */}
-          <nav className="p-4 space-y-1.5 overflow-y-auto flex-1 min-h-0 custom-sidebar-scrollbar">
-            <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
-              Ministry Operations
+          {/* Navigation Items (Pill Style) */}
+          <nav className="p-3 space-y-1 overflow-y-auto flex-1 min-h-0">
+            <p className="px-3 pt-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+              Operations
             </p>
             {visibleNavItems.map((item) => {
               const Icon = item.icon;
@@ -148,34 +193,33 @@ export default function AdminLayout() {
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) =>
-                    `group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    `group flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                       isActive
-                        ? "bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg shadow-amber-900/40 border border-amber-400/30 font-semibold translate-x-1"
-                        : "text-slate-300 hover:bg-slate-800/80 hover:text-amber-300 hover:translate-x-0.5"
+                        ? "bg-white/[0.08] text-white border border-white/[0.08] shadow-xs font-semibold"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <Icon
-                          className={`w-4 h-4 transition-colors ${
-                            isActive ? "text-amber-100" : "text-slate-400 group-hover:text-amber-400"
+                          className={`w-4 h-4 shrink-0 transition-colors ${
+                            isActive ? "text-amber-400" : "text-slate-400 group-hover:text-slate-300"
                           }`}
                         />
-                        <div className="flex flex-col text-left">
-                          <span>{item.label}</span>
-                          <span
-                            className={`text-[10px] ${
-                              isActive ? "text-amber-100/80" : "text-slate-500 group-hover:text-amber-300/70"
-                            }`}
-                          >
-                            {item.amharic}
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="truncate">{item.label}</span>
+                          <span className="text-[10px] text-slate-500 font-normal hidden sm:inline truncate">
+                            • {item.amharic}
                           </span>
                         </div>
                       </div>
-                      {isActive && <ChevronRight className="w-3.5 h-3.5 text-amber-200" />}
+                      {isActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 ml-1" />
+                      )}
                     </>
                   )}
                 </NavLink>
@@ -184,73 +228,74 @@ export default function AdminLayout() {
           </nav>
         </div>
 
-        {/* User Status & Sign Out Footer (Pinned to bottom) */}
-        <div className="p-4 border-t border-slate-800 bg-[#080d18]/60 space-y-3 shrink-0">
-          <div className="flex items-center gap-3 px-2 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-600 to-rose-800 flex items-center justify-center text-white font-bold text-xs shadow-md border border-amber-400/30">
+        {/* User Card & Sign Out */}
+        <div className="p-3.5 border-t border-slate-800/60 bg-[#070a12] space-y-2 shrink-0">
+          <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-slate-950 font-bold text-xs shrink-0 shadow-xs">
               {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : "E"}
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-xs font-semibold text-slate-200 truncate">
+              <p className="text-xs font-medium text-slate-200 truncate leading-tight">
                 {profile?.full_name || user?.user_metadata?.full_name || user?.email || "Staff User"}
               </p>
-              <div className="flex items-center gap-1 text-[10px] text-amber-400">
-                <ShieldCheck className="w-3 h-3" />
-                <span className="truncate">{role?.name || profile?.role || "Authorized User"}</span>
-              </div>
+              <p className="text-[10px] text-slate-400 truncate">
+                {role?.name || profile?.role || "Authorized Staff"}
+              </p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 hover:bg-rose-900/50 border border-rose-900/40 transition-all duration-200 cursor-pointer"
+            className="w-full flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium text-slate-400 hover:text-rose-300 hover:bg-rose-950/20 border border-transparent hover:border-rose-900/30 transition-all duration-150 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out • ውጣ</span>
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="pl-72 flex-1 flex flex-col pt-1.5">
-        {/* Top Navbar */}
-        <header className="sticky top-1.5 z-30 flex h-16 items-center justify-between border-b border-amber-900/10 bg-white/90 backdrop-blur-md px-8 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="h-5 w-1 rounded-full bg-amber-600" />
-            <div>
-              <h1 className="font-serif-eotc text-lg font-bold text-slate-900">
+      <div className="pl-0 lg:pl-72 flex-1 flex flex-col min-w-0">
+        
+        {/* Top Executive Header */}
+        <header className="sticky top-0 z-30 flex h-14 sm:h-16 items-center justify-between border-b border-slate-200/80 bg-white/80 backdrop-blur-md px-4 sm:px-6 lg:px-8">
+          
+          {/* Left: Mobile Toggle & Breadcrumb */}
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors shrink-0 cursor-pointer"
+              aria-label="Open navigation menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-2 text-xs text-slate-400 min-w-0">
+              <span className="hidden sm:inline">Ministry Portal</span>
+              <span className="hidden sm:inline">/</span>
+              <h1 className="font-semibold text-slate-900 text-sm sm:text-base truncate">
                 {getPageTitle()}
               </h1>
-              <p className="text-[11px] text-slate-500 font-medium">
-                የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን የወጣቶች መንፈሳዊ አገልግሎት መድረክ
-              </p>
             </div>
           </div>
 
-          {/* Right Header Status Bar */}
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200/70 text-xs font-medium text-amber-800">
-              <span className="text-sm">📅</span>
-              <span>
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </span>
+          {/* Right Status Bar */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 font-medium px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200/60">
+              <span>{new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Bot Online</span>
             </div>
           </div>
         </header>
 
         {/* Page Content Body */}
-        <main className="p-8 max-w-7xl w-full mx-auto flex-1">
+        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto flex-1 min-w-0">
           <Outlet />
         </main>
       </div>

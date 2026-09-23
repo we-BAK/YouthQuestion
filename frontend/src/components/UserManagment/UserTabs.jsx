@@ -5,7 +5,7 @@ export default function UserTabs({
   activeUsers,
 }) {
   return (
-    <div className="flex border-b border-slate-200 gap-6">
+    <div className="flex border-b border-slate-200 gap-4 sm:gap-6 overflow-x-auto pb-px">
 
       <Tab
         active={activeTab === "all"}

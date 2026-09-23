@@ -33,7 +33,7 @@ export default function RegisterUserModal({
 
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-lg space-y-4 rounded-3xl bg-white p-7 shadow-2xl border border-amber-500/20"
+        className="w-full max-w-lg space-y-4 rounded-3xl bg-white p-5 sm:p-7 shadow-2xl border border-amber-500/20 max-h-[90vh] overflow-y-auto"
       >
 
         {/* Header */}

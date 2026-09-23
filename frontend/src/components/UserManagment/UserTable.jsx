@@ -8,7 +8,7 @@ export default function UserTable({
   statusUpdating,
 }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200/90 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-2xl border border-slate-200/90 bg-white shadow-xs">
 
       {loading ? (
         <div className="p-16 text-center flex flex-col items-center space-y-3">
@@ -29,7 +29,7 @@ export default function UserTable({
           No users registered in this view.
         </div>
       ) : (
-        <table className="w-full text-left text-sm text-slate-600 border-collapse">
+        <table className="w-full min-w-[650px] text-left text-sm text-slate-600 border-collapse">
 
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 uppercase font-semibold text-xs tracking-wider">
             <tr>

@@ -130,46 +130,46 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* ── Welcome Banner ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0e1628] via-[#16233f] to-[#0c1322] border border-amber-500/25 p-7 sm:p-9 text-white shadow-xl">
-        {/* Background Cross Watermark */}
-        <div className="absolute right-4 -bottom-10 opacity-10 pointer-events-none select-none">
-          <EthiopianCross size={240} variant="white" />
+    <div className="space-y-6">
+      {/* ── Executive Welcome Banner ── */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#090d16] border border-slate-800/80 p-5 sm:p-7 text-white shadow-xs">
+        {/* Subtle Watermark */}
+        <div className="absolute right-4 -bottom-10 opacity-[0.04] pointer-events-none select-none">
+          <EthiopianCross size={260} variant="white" />
         </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>✞ የወጣቶች አገልግሎት አጠቃላይ እይታ • Ministry Overview</span>
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-amber-300 text-xs font-medium">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>Ministry Overview • አጠቃላይ እይታ</span>
             </div>
 
-            <h1 className="font-serif-eotc text-3xl sm:text-4xl font-bold tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-serif-eotc">
               ሰላም ለእናንተ ይሁን
             </h1>
-            <p className="text-sm text-amber-100/80 font-normal leading-relaxed">
-              Welcome to the EOTC Youth Question Review & Spiritual Programs Portal. Track submitted youth inquiries, schedule church discussion gatherings, and assign theological topics to clergy.
+            <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+              Track youth inquiries, organize upcoming church discussion sessions, and assign theological topics to clergy reviewers.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3 shrink-0">
+          <div className="flex flex-wrap gap-2.5 shrink-0">
             <Can permission="PROGRAMS_CREATE">
               <Link
                 to={ROUTES.PROGRAM_CREATE}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md cursor-pointer"
+                className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
-                <span>+ New Program</span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>New Program</span>
               </Link>
             </Can>
 
             <Can permission="QUESTIONS_VIEW">
               <Link
                 to={ROUTES.QUESTIONS}
-                className="inline-flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700/90 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-700 transition-colors"
+                className="inline-flex items-center gap-1.5 bg-white/[0.06] hover:bg-white/[0.1] text-white text-xs font-medium px-3.5 py-2 rounded-lg border border-white/[0.08] transition-colors"
               >
-                <HelpCircle className="w-4 h-4 text-amber-400" />
+                <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
                 <span>Review Questions</span>
               </Link>
             </Can>
@@ -178,126 +178,134 @@ export default function DashboardPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium">
+        <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium">
           {error}
         </div>
       )}
 
-      {/* ── 4 Main KPI Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* ── 4 Executive KPI Cards (Stripe / Linear Style) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Questions */}
-        <div className="bg-white rounded-2xl border border-amber-900/10 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Total Questions
-            </span>
-            <div className="p-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
-              <HelpCircle className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-bold text-slate-900 font-serif-eotc">
-              {totalQuestions}
-            </h3>
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-              <span>{categorizedQuestions.length} categorized</span>
-              <span>•</span>
-              <span className="text-emerald-700 font-semibold">
-                {totalQuestions > 0
-                  ? Math.round((categorizedQuestions.length / totalQuestions) * 100)
-                  : 0}
-                % ready
+        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500 tracking-wide uppercase">
+                Total Inquiries
               </span>
-            </p>
+              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center">
+                <HelpCircle className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2">
+              <h3 className="text-2xl font-bold text-slate-900 tracking-tight font-sans">
+                {totalQuestions}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+                <span>{categorizedQuestions.length} categorized</span>
+                <span>•</span>
+                <span className="text-emerald-700 font-medium">
+                  {totalQuestions > 0
+                    ? Math.round((categorizedQuestions.length / totalQuestions) * 100)
+                    : 0}
+                  % organized
+                </span>
+              </p>
+            </div>
           </div>
           <Link
             to={ROUTES.QUESTIONS}
-            className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-amber-700 flex items-center justify-between group-hover:text-amber-900"
+            className="mt-4 pt-3 border-t border-slate-100 text-xs font-medium text-slate-600 hover:text-amber-700 flex items-center justify-between transition-colors"
           >
             <span>View All Questions</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
           </Link>
         </div>
 
-        {/* Uncategorized Questions (Action Alert) */}
-        <div className="bg-white rounded-2xl border border-rose-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-              <span>Needs Review</span>
-            </span>
-            <div className="p-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200">
-              <AlertCircle className="w-5 h-5" />
+        {/* Uncategorized Questions */}
+        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500 tracking-wide uppercase flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                <span>Needs Topic</span>
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 border border-rose-200/60 flex items-center justify-center">
+                <AlertCircle className="w-4 h-4" />
+              </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-bold text-rose-800 font-serif-eotc">
-              {uncategorizedQuestions.length}
-            </h3>
-            <p className="text-xs text-rose-600 mt-1">
-              Uncategorized inquiries awaiting clergy topic assignment
-            </p>
+            <div className="mt-2">
+              <h3 className="text-2xl font-bold text-slate-900 tracking-tight font-sans">
+                {uncategorizedQuestions.length}
+              </h3>
+              <p className="text-xs text-rose-600 mt-1">
+                Inquiries awaiting topic classification
+              </p>
+            </div>
           </div>
           <Link
             to={ROUTES.QUESTIONS}
-            className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-rose-700 flex items-center justify-between group-hover:text-rose-900"
+            className="mt-4 pt-3 border-t border-slate-100 text-xs font-medium text-rose-700 hover:text-rose-800 flex items-center justify-between transition-colors"
           >
-            <span>Assign Categories Now</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <span>Assign Categories</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-rose-400" />
           </Link>
         </div>
 
         {/* Upcoming Programs */}
-        <div className="bg-white rounded-2xl border border-amber-900/10 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Upcoming Programs
-            </span>
-            <div className="p-2.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">
-              <Calendar className="w-5 h-5" />
+        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500 tracking-wide uppercase">
+                Upcoming Sessions
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center">
+                <Calendar className="w-4 h-4" />
+              </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-bold text-slate-900 font-serif-eotc">
-              {upcomingPrograms.length}
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Scheduled youth discussion sessions & workshops
-            </p>
+            <div className="mt-2">
+              <h3 className="text-2xl font-bold text-slate-900 tracking-tight font-sans">
+                {upcomingPrograms.length}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Scheduled gatherings & workshops
+              </p>
+            </div>
           </div>
           <Link
             to={ROUTES.PROGRAMS}
-            className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-blue-700 flex items-center justify-between group-hover:text-blue-900"
+            className="mt-4 pt-3 border-t border-slate-100 text-xs font-medium text-slate-600 hover:text-blue-700 flex items-center justify-between transition-colors"
           >
             <span>Manage Schedule</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
           </Link>
         </div>
 
         {/* Active Clergy & Reviewers */}
-        <div className="bg-white rounded-2xl border border-amber-900/10 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Active Clergy
-            </span>
-            <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <Users className="w-5 h-5" />
+        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500 tracking-wide uppercase">
+                Active Clergy
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-bold text-slate-900 font-serif-eotc">
-              {activeClergyCount}
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Authorized reviewers & spiritual advisors
-            </p>
+            <div className="mt-2">
+              <h3 className="text-2xl font-bold text-slate-900 tracking-tight font-sans">
+                {activeClergyCount}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Authorized reviewers & coordinators
+              </p>
+            </div>
           </div>
           <Link
             to={ROUTES.USERS}
-            className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-emerald-700 flex items-center justify-between group-hover:text-emerald-900"
+            className="mt-4 pt-3 border-t border-slate-100 text-xs font-medium text-slate-600 hover:text-emerald-700 flex items-center justify-between transition-colors"
           >
-            <span>View Clergy Directory</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <span>View Directory</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
           </Link>
         </div>
       </div>
@@ -309,8 +317,8 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Upcoming Programs Spotlight */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-sm space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 p-5 sm:p-7 shadow-xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
                   <Calendar className="w-4 h-4" />
@@ -400,8 +408,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Youth Questions Feed */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-sm space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 p-5 sm:p-7 shadow-xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
                   <HelpCircle className="w-4 h-4" />

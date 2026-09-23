@@ -108,8 +108,8 @@ export default function LoginPage() {
       </div>
 
       {/* Main Login Card */}
-      <div className="relative w-full max-w-md my-8">
-        <div className="relative rounded-3xl bg-[#11192b]/90 border border-amber-500/25 p-8 shadow-2xl backdrop-blur-xl space-y-6">
+      <div className="relative w-full max-w-md my-6 sm:my-8">
+        <div className="relative rounded-2xl sm:rounded-3xl bg-[#11192b]/95 border border-amber-500/25 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
           
           {/* Header with Ethiopian Cross */}
           <div className="text-center space-y-3">
